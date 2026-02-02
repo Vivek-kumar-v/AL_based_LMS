@@ -38,7 +38,7 @@ const registerStudent = asyncHandler(async (req, res) => {
 
 
   // AVATAR UPLOAD
-  const avatarLocalPath = req.files?.avatar?.[0]?.path;
+  const avatarLocalPath = req.file?.path;
 
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar image is required");
