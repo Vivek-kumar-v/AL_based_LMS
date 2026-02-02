@@ -20,10 +20,13 @@ app.use(
 
   // Routes import
   import studentRoute from "./routes/student.route.js"
+  import documentRoute from "./routes/Document.route.js"
 
 
   // Routes setup
   app.use("/api/v1/users", studentRoute)
+  app.use("/api/v1/documents", documentRoute)
+  
 
 
 export { app }

@@ -249,5 +249,25 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 });
 
+const getStudentProfile = asyncHandler(async (req, res) => {
+    const studentId = req.student?._id;
+  
+    if (!studentId) {
+      throw new ApiError(401, "Unauthorized request");
+    }
+  
+    const student = await Student.findById(studentId).select(
+      "-password -refreshToken"
+    );
+  
+    if (!student) {
+      throw new ApiError(404, "Student not found");
+    }
+  
+    return res.status(200).json(
+      new ApiResponse(200, student, "Student profile fetched successfully")
+    );
+  });
 
-export { registerStudent ,loginStudent,logoutStudent,refreshAccessToken};
+
+export { registerStudent ,loginStudent,logoutStudent,refreshAccessToken,getStudentProfile};

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loginStudent, logoutStudent, refreshAccessToken, registerStudent } from "../controllers/student.controller.js"
+import { getStudentProfile, loginStudent, logoutStudent, refreshAccessToken, registerStudent } from "../controllers/student.controller.js"
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -11,6 +11,7 @@ router.route("/register").post(
 
 
 router.route("/login").post(loginStudent)
+router.route("/profile").get(verifyJWT,getStudentProfile);
 
 
 // secured routes
