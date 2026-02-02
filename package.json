@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "jsonwebtoken": "^9.0.3"
+    "cloudinary": "^2.9.0",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.0.2"
   }
 }
