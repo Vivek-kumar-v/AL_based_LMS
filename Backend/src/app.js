@@ -18,4 +18,12 @@ app.use(
   app.use(express.static("public"))
   app.use(cookieParser())  
 
+  // Routes import
+  import studentRoute from "./routes/student.route.js"
+
+
+  // Routes setup
+  app.use("/api/v1/users", studentRoute)
+
+
 export { app }
