@@ -7,61 +7,81 @@ import { Concept } from "../models/concept.model.js";
 import mongoose from "mongoose";
 
 const uploadDocument = asyncHandler(async (req, res) => {
-  const {
-    title,
-    description,
-    documentType, // notes | pyq
-    subject,
-    semester,
-    year,
-    isPublic,
-  } = req.body;
-
-  const student = req.student;
-
-  if (!student) {
-    throw new ApiError(401, "Unauthorized");
-  }
-
-  if (!title || !documentType || !subject) {
-    throw new ApiError(400, "Title, Document Type and Subject are required");
-  }
-
-  // FILE UPLOAD
-
-  const localFilePath = req.file?.path;
-  if (!localFilePath) {
-    throw new ApiError(400, "Document file is required");
-  }
-  const uploadResult = await uploadOnCloudinary(localFilePath);
-  if (!uploadResult) {
-    throw new ApiError(500, "Document upload failed, please try again");
-  }
-  // CREATE DOCUMENT ENTRY IN DB
-  const document = await Document.create({
-    title,
-    description,
-    documentType,
-    subject,
-    semester,
-    year,
-    fileUrl: uploadResult.url,
-    fileType: uploadResult.resource_type,
-    uploadedBy: student._id,
-    isPublic: isPublic ?? true,
-    processingStatus: "pending",
-  });
-
-  return res
-    .status(201)
-    .json(
+    const {
+      title,
+      description,
+      documentType, // notes | pyq
+      subject,
+      semester,
+      year,
+      isPublic,
+    } = req.body;
+  
+    const student = req.student;
+  
+    if (!student) {
+      throw new ApiError(401, "Unauthorized");
+    }
+  
+    if (!title || !documentType || !subject) {
+      throw new ApiError(400, "Title, Document Type and Subject are required");
+    }
+  
+    // =========================
+    // FILE UPLOAD
+    // =========================
+    const localFilePath = req.file?.path;
+    if (!localFilePath) {
+      throw new ApiError(400, "Document file is required");
+    }
+  
+    const uploadResult = await uploadOnCloudinary(localFilePath);
+    if (!uploadResult) {
+      throw new ApiError(500, "Document upload failed, please try again");
+    }
+  
+    // =========================
+    // NORMALIZE FILE TYPE
+    // =========================
+    let normalizedFileType;
+  
+    if (uploadResult.resource_type === "raw") {
+      normalizedFileType = "pdf";
+    } else if (uploadResult.resource_type === "image") {
+      normalizedFileType = "image";
+    } else {
+      throw new ApiError(400, "Unsupported document type");
+    }
+  
+    // =========================
+    // CREATE DOCUMENT ENTRY
+    // =========================
+    const document = await Document.create({
+      title,
+      description,
+      documentType,
+      subject,
+      semester,
+      year,
+  
+      // 🔥 IMPORTANT FIXES
+      fileUrl: uploadResult.secure_url,   // ✅ always HTTPS
+      fileType: normalizedFileType,        // ✅ pdf | image
+  
+      uploadedBy: student._id,
+      isPublic: isPublic ?? true,
+      processingStatus: "pending",
+    });
+  
+    return res.status(201).json(
       new ApiResponse(
         201,
         document,
         "Document uploaded successfully and queued for processing"
       )
     );
-});
+  });
+  
 
 const getAllNotes = asyncHandler(async (req, res) => {
   const student = req.student;
