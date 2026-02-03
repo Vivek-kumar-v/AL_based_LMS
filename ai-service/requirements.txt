@@ -6,3 +6,5 @@ pillow
 requests
 spacy
 python-dotenv
+openai
+google-generativeai

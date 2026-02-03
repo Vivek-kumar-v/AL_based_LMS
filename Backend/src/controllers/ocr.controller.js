@@ -9,9 +9,8 @@ import { Concept } from "../models/concept.model.js";
 const processDocumentOCR = asyncHandler(async (req, res) => {
     const { documentId } = req.params;
   
-    // =========================
+
     // VALIDATE DOCUMENT ID
-    // =========================
     if (!mongoose.Types.ObjectId.isValid(documentId)) {
       throw new ApiError(400, "Invalid document ID");
     }
@@ -28,9 +27,8 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
       );
     }
   
-    // =========================
+
     // NORMALIZE FILE TYPE (IMPORTANT FIX)
-    // =========================
     let normalizedFileType;
   
     if (document.fileType === "raw") {
@@ -41,13 +39,12 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Unsupported file type for OCR");
     }
   
-    // =========================
+
     // CALL PYTHON OCR SERVICE
-    // =========================
     let ocrResponse;
     try {
       ocrResponse = await axios.post(
-        "http://127.0.0.1:8001/ocr",
+        "http://127.0.0.1:8001/ocr/",
         {
           fileUrl: document.fileUrl,
           fileType: normalizedFileType,
@@ -68,19 +65,19 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
       throw new ApiError(500, "OCR service failed");
     }
   
-    const { rawText, cleanedText, concepts } = ocrResponse.data;
+    const { rawText, cleanedText, llmText, concepts } = ocrResponse.data;
+
   
-    // =========================
+
     // SAVE OCR RESULT
-    // =========================
     document.rawText = rawText;
+    document.llmText = llmText;
     document.cleanedText = cleanedText;
     document.processingStatus = "processed";
     document.processedAt = new Date();
   
-    // =========================
+
     // SAVE CONCEPTS
-    // =========================
     const conceptIds = [];
   
     for (const conceptName of concepts) {
@@ -95,6 +92,10 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
     document.extractedConcepts = conceptIds;
   
     await document.save();
+    const populatedDocument = await Document.findById(document._id)
+    .populate("extractedConcepts")
+    .select("+rawText +cleanedText +llmText");
+
   
     return res.status(200).json(
       new ApiResponse(200, document, "OCR processing completed successfully")

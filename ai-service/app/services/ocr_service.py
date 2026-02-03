@@ -5,6 +5,9 @@ from PIL import Image
 from io import BytesIO
 
 from app.services.text_cleaning import clean_text
+from app.services.gemini_refinement import refine_text_with_gemini
+from app.services.llm_refinement import refine_text_with_llm
+from app.services.text_refinement import refine_text
 from app.services.concept_extraction import extract_concepts
 from app.models.schemas import OCRRequest
 from app.core.config import TESSERACT_PATH
@@ -37,11 +40,22 @@ def process_document_ocr(payload: OCRRequest):
     else:
         raw_text = extract_text_from_image(response.content)
 
-    cleaned_text = clean_text(raw_text)
+    # cleaned_text = clean_text(raw_text)
+     # cleaned_text = refine_text(raw_text)
+    cleaned_text = refine_text(raw_text)
+
+    llmText = refine_text_with_gemini(cleaned_text)
+
+    # fallback if LLM fails
+    # llmText = llmText or cleaned_text
+
     concepts = extract_concepts(cleaned_text)
+    
 
     return {
-        "rawText": raw_text,
-        "cleanedText": cleaned_text,
-        "concepts": concepts
+    "rawText": raw_text,
+    "cleanedText": cleaned_text,
+    "llmText": llmText,
+    "concepts": concepts
+
     }

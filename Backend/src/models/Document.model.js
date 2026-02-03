@@ -61,6 +61,11 @@ const documentSchema = new Schema(
       select: false, // large field
     },
 
+    llmText: {
+        type: String,
+        select: false, // large field
+    },
+
     cleanedText: {
       type: String,
       select: false,
