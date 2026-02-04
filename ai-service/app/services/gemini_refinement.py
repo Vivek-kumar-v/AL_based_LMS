@@ -10,9 +10,8 @@ from google.genai import types
 
 load_dotenv()
 
-# =========================
+
 # CONFIGURATION
-# =========================
 
 ENABLE_LLM = os.getenv("ENABLE_LLM", "true").lower() == "true"
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -29,9 +28,8 @@ if ENABLE_LLM and GEMINI_API_KEY:
     except Exception as e:
         print(f"⚠️ Error initializing Gemini Client: {e}")
 
-# =========================
+
 # SAFETY HELPERS
-# =========================
 
 def length_safety_check(input_text: str, output_text: str, max_ratio: float = 3.0) -> bool:
     """
@@ -57,9 +55,8 @@ def keyword_coverage_check(input_text: str, output_text: str, threshold: float =
     return len(input_words & output_words) / len(input_words) >= threshold
 
 
-# =========================
+
 # RESPONSE TEXT EXTRACTOR
-# =========================
 
 def extract_text_from_response(response) -> Optional[str]:
     """
@@ -100,9 +97,8 @@ def extract_text_from_response(response) -> Optional[str]:
         return None
 
 
-# =========================
+
 # PROMPT BUILDER
-# =========================
 
 def build_prompt(cleaned_text: str) -> str:
     return f"""
@@ -131,13 +127,11 @@ OCR TEXT:
 """.strip()
 
 
-# =========================
-# MAIN REFINEMENT FUNCTION
-# =========================
 
-# =========================
+# MAIN REFINEMENT FUNCTION
+
+
 # MAIN REFINEMENT FUNCTION (WITH SUCCESS LOGS)
-# =========================
 
 def refine_text_with_gemini(cleaned_text: str) -> Optional[str]:
     """
@@ -200,9 +194,8 @@ def refine_text_with_gemini(cleaned_text: str) -> Optional[str]:
                 print("⚠️ Received empty response from Gemini.")
                 return None
 
-            # =========================
+       
             # OUTPUT SAFETY VALIDATIONS
-            # =========================
 
             # Check 1: Length Ratio (Relaxed to 3.0)
             if not length_safety_check(cleaned_text, refined_text, max_ratio=3.0):
@@ -215,9 +208,8 @@ def refine_text_with_gemini(cleaned_text: str) -> Optional[str]:
                 print("⚠️ Output rejected: Keyword coverage too low (potential hallucination).")
                 return None
 
-            # =========================
+    
             # SUCCESS LOGGING
-            # =========================
             print(f"✅ Gemini Refinement Successful! (Time: {elapsed:.2f}s)")
             print(f"   Input Length: {len(cleaned_text)} chars")
             print(f"   Output Length: {len(refined_text)} chars")
