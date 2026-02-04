@@ -45,7 +45,10 @@ def process_document_ocr(payload: OCRRequest):
     cleaned_text = refine_text(raw_text)
 
     llmText = refine_text_with_gemini(cleaned_text)
-
+    
+    if llmText is None:
+        llmText = cleaned_text 
+    
     # fallback if LLM fails
     # llmText = llmText or cleaned_text
 

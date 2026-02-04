@@ -50,7 +50,7 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
           fileType: normalizedFileType,
         },
         {
-          timeout: 60000, // OCR can be slow
+          timeout: 600000, // OCR can be slow
         }
       );
     } catch (err) {
@@ -66,7 +66,7 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
     }
   
     const { rawText, cleanedText, llmText, concepts } = ocrResponse.data;
-
+    
   
 
     // SAVE OCR RESULT

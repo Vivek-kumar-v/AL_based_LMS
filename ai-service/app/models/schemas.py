@@ -7,4 +7,5 @@ class OCRRequest(BaseModel):
 class OCRResponse(BaseModel):
     rawText: str
     cleanedText: str
+    llmText: str
     concepts: list[str]
