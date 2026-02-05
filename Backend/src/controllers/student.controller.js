@@ -146,8 +146,10 @@ const loginStudent = asyncHandler(async (req, res) => {
   // COOKIE OPTIONS
   const cookieOptions = {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
   };
+  
 
 
   // RESPONSE
@@ -182,8 +184,10 @@ const logoutStudent = asyncHandler(async (req, res) => {
 
   const cookieOptions = {
     httpOnly: true,
-    secure: true,
-  }
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  };
+  
 
     return res
         .status(200)
@@ -223,8 +227,10 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     
         const cookieOptions = {
             httpOnly: true,
-            secure: true,
-          }
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+          };
+          
     
           const {accessToken, refreshToken1 } = await generateAccessAndRefereshTokens(student._id)
     

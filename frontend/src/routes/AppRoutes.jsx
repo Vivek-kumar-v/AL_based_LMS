@@ -1,0 +1,82 @@
+import { Routes, Route } from "react-router-dom";
+import ProtectedRoute from "../components/common/ProtectedRoute";
+import React from "react";
+
+// Pages
+import Login from "../pages/Auth/Login";
+import Register from "../pages/Auth/Register";
+import Dashboard from "../pages/Dashboard/Dashboard";
+import SmartSearch from "../pages/Search/SmartSearch";
+
+
+import UploadDocument from "../pages/Documents/UploadDocument";
+import Notes from "../pages/Documents/Notes";
+import PYQs from "../pages/Documents/PYQs";
+
+const AppRoutes = () => {
+  return (
+    <Routes>
+      {/* Public */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
+      {/* Protected */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/upload"
+        element={
+          <ProtectedRoute>
+            <UploadDocument />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/notes"
+        element={
+          <ProtectedRoute>
+            <Notes />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/search"
+        element={
+          <ProtectedRoute>
+            <SmartSearch />
+          </ProtectedRoute>
+        }
+      />
+
+
+      <Route
+        path="/pyqs"
+        element={
+          <ProtectedRoute>
+            <PYQs />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  );
+};
+
+export default AppRoutes;
