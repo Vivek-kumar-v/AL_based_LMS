@@ -2,12 +2,18 @@ import mongoose, { Schema } from "mongoose";
 
 const conceptSchema = new Schema(
   {
-    // =========================
-    // BASIC CONCEPT INFO
-    // =========================
-    name: {
+    // Student-friendly name (shown on UI)
+    displayName: {
       type: String,
       required: true,
+      trim: true,
+    },
+
+    // System-friendly name (used for matching + avoiding duplicates)
+    normalizedName: {
+      type: String,
+      required: true,
+      lowercase: true,
       trim: true,
       index: true,
     },
@@ -15,6 +21,7 @@ const conceptSchema = new Schema(
     subject: {
       type: String,
       required: true,
+      trim: true,
       index: true,
     },
 
@@ -23,9 +30,6 @@ const conceptSchema = new Schema(
       trim: true,
     },
 
-    // =========================
-    // RELATIONSHIPS
-    // =========================
     relatedConcepts: [
       {
         type: Schema.Types.ObjectId,
@@ -33,12 +37,9 @@ const conceptSchema = new Schema(
       },
     ],
 
-    // =========================
-    // ANALYTICS (FOR AI / EXAMS)
-    // =========================
     importanceScore: {
       type: Number,
-      default: 0, // increases based on PYQ frequency
+      default: 0,
     },
 
     frequencyInPYQ: {
@@ -46,14 +47,13 @@ const conceptSchema = new Schema(
       default: 0,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-// =========================
-// INDEXES
-// =========================
-conceptSchema.index({ name: "text", subject: "text" });
+// 🚀 Unique per subject (prevents duplicates)
+conceptSchema.index({ normalizedName: 1, subject: 1 }, { unique: true });
+
+// Optional text search
+conceptSchema.index({ displayName: "text", subject: "text" });
 
 export const Concept = mongoose.model("Concept", conceptSchema);

@@ -21,12 +21,20 @@ app.use(
   // Routes import
   import studentRoute from "./routes/student.route.js"
   import documentRoute from "./routes/Document.route.js"
+  import searchRoutes from "./routes/search.routes.js";
+  import dashboardRoutes from "./routes/dashboard.routes.js";
+  import revisionRoutes from "./routes/revision.routes.js";
+  import conceptRoutes from "./routes/concept.routes.js";
 
 
   // Routes setup
   app.use("/api/v1/users", studentRoute)
   app.use("/api/v1/documents", documentRoute)
-  
+  app.use("/api/v1/search", searchRoutes);
+  app.use("/api/v1/dashboard", dashboardRoutes);
+  app.use("/api/v1/revision", revisionRoutes);
+  app.use("/api/v1/concepts", conceptRoutes);
+
 
 
 export { app }
