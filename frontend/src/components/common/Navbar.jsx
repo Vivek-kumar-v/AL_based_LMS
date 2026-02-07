@@ -40,6 +40,11 @@ const Navbar = () => {
           <Link to="/search" className="hover:underline text-blue-600">
             Smart Search
           </Link>
+
+          <Link to="/profile" className="text-blue-600 font-medium hover:underline">
+            Profile
+          </Link>
+
         </div>
 
         {/* Right Side */}

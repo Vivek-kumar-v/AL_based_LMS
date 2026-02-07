@@ -30,7 +30,7 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
   // NORMALIZE FILE TYPE
   let normalizedFileType;
 
-  if (document.fileType === "raw") {
+  if (document.fileType === "pdf") {
     normalizedFileType = "pdf";
   } else if (document.fileType === "image") {
     normalizedFileType = "image";

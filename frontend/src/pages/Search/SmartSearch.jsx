@@ -22,19 +22,22 @@ const SmartSearch = () => {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSearch = async () => {
-    try {
-      setLoading(true);
-      setError("");
+const handleSearch = async () => {
+  try {
+    setLoading(true);
+    setError("");
 
-      const res = await smartSearchApi(filters);
-      setResults(res.data || []);
-    } catch (err) {
-      setError(err?.response?.data?.message || "Search failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const res = await smartSearchApi(filters);
+
+    // IMPORTANT FIX
+    setResults(res?.data?.data || []);
+  } catch (err) {
+    setError(err?.response?.data?.message || "Search failed");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // auto load on first open
   useEffect(() => {

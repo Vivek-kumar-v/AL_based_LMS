@@ -13,7 +13,7 @@ const UploadForm = () => {
     isPublic: true,
   });
 
-  const [file, setFile] = useState(null);
+  const [document, setDocument] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -33,7 +33,7 @@ const UploadForm = () => {
     setError("");
     setMessage("");
 
-    if (!file) {
+    if (!document) {
       setError("Please upload a file");
       return;
     }
@@ -51,7 +51,7 @@ const UploadForm = () => {
     formData.append("semester", form.semester);
     formData.append("year", form.year);
     formData.append("isPublic", form.isPublic);
-    formData.append("file", file);
+    formData.append("document", document);
 
     try {
       setLoading(true);
@@ -61,7 +61,9 @@ const UploadForm = () => {
 
       const documentId = uploadRes?.data?._id;
 
-      setMessage("Document uploaded successfully ✅ OCR is starting...");
+
+
+      setMessage("Document uploaded successfully ✅ ");
 
       // 2) Auto OCR
       if (documentId) {
@@ -79,7 +81,7 @@ const UploadForm = () => {
         year: "",
         isPublic: true,
       });
-      setFile(null);
+      setDocument(null);
     } catch (err) {
       setError(err?.response?.data?.message || "Upload failed");
     } finally {
@@ -169,7 +171,7 @@ const UploadForm = () => {
       <input
         type="file"
         className="w-full border p-2 rounded"
-        onChange={(e) => setFile(e.target.files[0])}
+        onChange={(e) => setDocument(e.target.files[0])}
       />
 
       <button

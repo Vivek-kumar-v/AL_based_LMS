@@ -23,7 +23,7 @@ export const deleteDocumentApi = async (documentId) => {
 };
 
 export const processOCRApi = async (documentId) => {
-  const res = await axiosInstance.post(`/ocr/${documentId}`);
+  const res = await axiosInstance.post(`/documents/${documentId}/ocr/`);
   return res.data;
 };
 

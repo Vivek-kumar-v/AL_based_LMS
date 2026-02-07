@@ -7,6 +7,11 @@ import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import SmartSearch from "../pages/Search/SmartSearch";
+import Profile from "../pages/Profile/Profile";
+import Concepts from "../pages/Concepts/Concepts";
+import ConceptPage from "../pages/Concepts/ConceptPage";
+
+
 
 
 import UploadDocument from "../pages/Documents/UploadDocument";
@@ -29,6 +34,35 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/concepts"
+        element={
+          <ProtectedRoute>
+            <Concepts />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/concepts/:id"
+        element={
+          <ProtectedRoute>
+            <ConceptPage />
+          </ProtectedRoute>
+        }
+      />
+
+
 
       <Route
         path="/dashboard"
