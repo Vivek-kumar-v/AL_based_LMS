@@ -6,12 +6,14 @@ export const AuthContext = createContext(null);
 
 const AuthProvider = ({ children }) => {
   const [student, setStudent] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
     const savedStudent = localStorage.getItem("student");
     if (savedStudent) {
       setStudent(JSON.parse(savedStudent));
     }
+    setAuthLoading(false);
   }, []);
 
   // ✅ LOGIN

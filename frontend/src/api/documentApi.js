@@ -27,5 +27,19 @@ export const processOCRApi = async (documentId) => {
   return res.data;
 };
 
+export const getDocumentLLMTextApi = async (documentId) => {
+  return axiosInstance.get(`/documents/${documentId}/llm-text`);
+};
+
+
+export const updateDocumentApi = async (documentId, data) => {
+  return axiosInstance.patch(`/documents/${documentId}`, data);
+};
+
+export const getDocumentByIdApi = async (documentId) => {
+  return axiosInstance.get(`/documents/${documentId}`);
+};
+
+
 export const smartSearchApi = (params) =>
   axiosInstance.get("/documents/search", { params });

@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { getAllNotesApi } from "../../api/documentApi";
 import DocumentCard from "../../components/documents/DocumentCard";
 import { Link } from "react-router-dom";
-import React from "react";
 
 const Notes = () => {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // ✅ Search state
+  const [search, setSearch] = useState("");
+  const [searchText, setSearchText] = useState("");
 
   const fetchNotes = async () => {
     try {
@@ -28,10 +31,37 @@ const Notes = () => {
     setNotes((prev) => prev.filter((d) => d._id !== id));
   };
 
+  // ✅ Filtered notes based on search
+  const filteredNotes = useMemo(() => {
+    if (!search) return notes;
+
+    const q = search.toLowerCase();
+
+    return notes.filter((doc) => {
+      return (
+        doc?.title?.toLowerCase().includes(q) ||
+        doc?.subject?.toLowerCase().includes(q) ||
+        doc?.documentType?.toLowerCase().includes(q) ||
+        String(doc?.semester || "").includes(q) ||
+        String(doc?.year || "").includes(q)
+      );
+    });
+  }, [notes, search]);
+
+  const handleSearch = () => {
+    setSearch(searchText.trim());
+  };
+
+  const clearSearch = () => {
+    setSearch("");
+    setSearchText("");
+  };
+
   if (loading) return <div className="p-6">Loading notes...</div>;
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
+      {/* HEADER */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">All Notes</h1>
 
@@ -48,12 +78,55 @@ const Notes = () => {
         </div>
       </div>
 
-      {notes.length === 0 ? (
-        <p>No notes uploaded yet.</p>
+      {/* ✅ SEARCH BAR */}
+      <div className="bg-white p-4 rounded-xl shadow mb-6 flex gap-3 items-center">
+        <input
+          className="w-full border p-2 rounded"
+          placeholder="Search by title, subject, semester, year..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSearch();
+          }}
+        />
+
+        <button
+          onClick={handleSearch}
+          className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
+        >
+          Search
+        </button>
+
+        {search && (
+          <button
+            onClick={clearSearch}
+            className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
+      {/* RESULT INFO */}
+      {search && (
+        <p className="text-sm text-gray-600 mb-4">
+          Showing results for: <span className="font-semibold">{search}</span> (
+          {filteredNotes.length} found)
+        </p>
+      )}
+
+      {/* LIST */}
+      {filteredNotes.length === 0 ? (
+        <p>No notes found.</p>
       ) : (
         <div className="grid gap-4">
-          {notes.map((doc) => (
-            <DocumentCard key={doc._id} doc={doc} onDelete={handleDelete} />
+          {filteredNotes.map((doc) => (
+            <DocumentCard
+              key={doc._id}
+              doc={doc}
+              onDelete={handleDelete}
+              onOCRDone={fetchNotes}
+            />
           ))}
         </div>
       )}

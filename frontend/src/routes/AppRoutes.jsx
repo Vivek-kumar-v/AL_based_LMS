@@ -10,6 +10,7 @@ import SmartSearch from "../pages/Search/SmartSearch";
 import Profile from "../pages/Profile/Profile";
 import Concepts from "../pages/Concepts/Concepts";
 import ConceptPage from "../pages/Concepts/ConceptPage";
+import EditDocument from "../pages/Documents/EditDocument";
 
 
 
@@ -99,6 +100,9 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+
+    <Route path="/documents/edit/:documentId" element={<EditDocument />} />
+
 
 
       <Route

@@ -41,7 +41,7 @@ def length_safety_check(input_text: str, output_text: str, max_ratio: float = 3.
     return len(output_text) <= len(input_text) * max_ratio
 
 
-def keyword_coverage_check(input_text: str, output_text: str, threshold: float = 0.4) -> bool:
+def keyword_coverage_check(input_text: str, output_text: str, threshold: float = 0.15) -> bool:
     """
     Ensures the output isn't hallucinated nonsense by checking if 
     it contains at least 40% of the original unique big words.

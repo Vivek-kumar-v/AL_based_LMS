@@ -16,7 +16,9 @@ const Profile = () => {
 
   const avatarUrl =
     student?.avatar ||
-    `https://ui-avatars.com/api/?name=${student?.fullName || "Student"}&background=000&color=fff`;
+    `https://ui-avatars.com/api/?name=${
+      student?.fullName || "Student"
+    }&background=000&color=fff`;
 
   const handleLogout = () => {
     logout();
@@ -44,7 +46,18 @@ const Profile = () => {
         </div>
 
         {/* PROFILE DETAILS */}
-        <div className="border rounded-lg p-4 space-y-3">
+        <div className="border rounded-lg p-4 space-y-4">
+
+          <div>
+            <p className="text-sm text-gray-500">College Name</p>
+            <p className="font-medium">{student.collegeName || "N/A"}</p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Department</p>
+            <p className="font-medium">{student.department || "N/A"}</p>
+          </div>
+
           <div>
             <p className="text-sm text-gray-500">Semester</p>
             <p className="font-medium">{student.semester || "N/A"}</p>

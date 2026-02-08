@@ -3,12 +3,11 @@ import { useAuth } from "../../hooks/useAuth";
 import React from "react";
 
 const ProtectedRoute = ({ children }) => {
-  const auth = useAuth();
+  const { student, authLoading } = useAuth();
 
-  // ✅ if auth context not ready yet
-  if (!auth) return <div>Loading...</div>;
-
-  const { student } = auth;
+  if (authLoading) {
+    return <div className="p-6">Checking login...</div>;
+  }
 
   if (!student) {
     return <Navigate to="/login" replace />;

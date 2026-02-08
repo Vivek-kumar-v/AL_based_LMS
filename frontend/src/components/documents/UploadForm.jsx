@@ -66,10 +66,10 @@ const UploadForm = () => {
       setMessage("Document uploaded successfully ✅ ");
 
       // 2) Auto OCR
-      if (documentId) {
-        await processOCRApi(documentId);
-        setMessage("OCR completed successfully 🎉");
-      }
+      // if (documentId) {
+      //   await processOCRApi(documentId);
+      //   setMessage("OCR completed successfully 🎉");
+      // }
 
       // Reset form
       setForm({

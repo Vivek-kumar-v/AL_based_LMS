@@ -403,6 +403,29 @@ const searchDocuments = asyncHandler(async (req, res) => {
       )
     );
   });
+
+   const getDocumentLLMText = asyncHandler(async (req, res) => {
+    const { documentId } = req.params;
+  
+    if (!mongoose.Types.ObjectId.isValid(documentId)) {
+      throw new ApiError(400, "Invalid document ID");
+    }
+  
+    const document = await Document.findById(documentId).select("llmText processingStatus title");
+  
+    if (!document) {
+      throw new ApiError(404, "Document not found");
+    }
+  
+    if (document.processingStatus !== "processed") {
+      throw new ApiError(400, "Document is not processed yet");
+    }
+  
+    return res.status(200).json(
+      new ApiResponse(200, { llmText: document.llmText || "" }, "LLM text fetched")
+    );
+  });
+  
   
 
-export { uploadDocument, getAllNotes, getDocumentById ,deleteDocument,getAllPYQs,searchDocuments,updateDocument };
+export { uploadDocument, getAllNotes, getDocumentById ,deleteDocument,getAllPYQs,searchDocuments,updateDocument, getDocumentLLMText };

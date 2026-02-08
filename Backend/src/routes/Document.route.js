@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-import { deleteDocument, getAllNotes, getAllPYQs, getDocumentById, searchDocuments, updateDocument, uploadDocument } from "../controllers/Document.controller.js";
+import { deleteDocument,getDocumentLLMText, getAllNotes, getAllPYQs, getDocumentById, searchDocuments, updateDocument, uploadDocument } from "../controllers/Document.controller.js";
 import { processDocumentOCR } from "../controllers/ocr.controller.js";
 
 const router = Router();
@@ -22,6 +22,9 @@ router.post(
 router.get("/notes", verifyJWT, getAllNotes);
 router.get("/pyqs", verifyJWT, getAllPYQs);
 router.get("/search", verifyJWT, searchDocuments);
+
+router.get("/:documentId/llm-text", verifyJWT, getDocumentLLMText);
+
 
 router.get("/:documentId", verifyJWT, getDocumentById);
 router.delete("/:documentId", verifyJWT, deleteDocument);

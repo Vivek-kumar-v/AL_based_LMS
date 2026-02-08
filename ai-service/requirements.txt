@@ -8,3 +8,7 @@ spacy
 python-dotenv
 openai
 google-generativeai
+pdf2image
+opencv-python
+numpy
+

@@ -1,7 +1,6 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerStudentApi } from "../../api/authApi";
-import React from "react";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -10,6 +9,9 @@ const Register = () => {
     username: "",
     email: "",
     fullName: "",
+    collegeName: "",
+    department: "",
+    semester: "",
     password: "",
   });
 
@@ -34,6 +36,9 @@ const Register = () => {
     formData.append("username", form.username);
     formData.append("email", form.email);
     formData.append("fullName", form.fullName);
+    formData.append("collegeName", form.collegeName);
+    formData.append("department", form.department);
+    formData.append("semester", form.semester);
     formData.append("password", form.password);
     formData.append("avatar", avatar);
 
@@ -67,6 +72,30 @@ const Register = () => {
           placeholder="Full Name"
           name="fullName"
           value={form.fullName}
+          onChange={handleChange}
+        />
+
+        <input
+          className="w-full border p-2 rounded mb-3"
+          placeholder="College Name"
+          name="collegeName"
+          value={form.collegeName}
+          onChange={handleChange}
+        />
+
+        <input
+          className="w-full border p-2 rounded mb-3"
+          placeholder="Department"
+          name="department"
+          value={form.department}
+          onChange={handleChange}
+        />
+
+        <input
+          className="w-full border p-2 rounded mb-3"
+          placeholder="Semester (eg: 6)"
+          name="semester"
+          value={form.semester}
           onChange={handleChange}
         />
 
