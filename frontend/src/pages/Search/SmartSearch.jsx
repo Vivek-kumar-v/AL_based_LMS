@@ -54,20 +54,7 @@ const handleSearch = async () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Smart Search</h1>
 
-        <div className="flex gap-3">
-          <Link className="underline text-blue-600" to="/dashboard">
-            Dashboard
-          </Link>
-          <Link className="underline text-blue-600" to="/upload">
-            Upload
-          </Link>
-          <Link className="underline text-blue-600" to="/notes">
-            Notes
-          </Link>
-          <Link className="underline text-blue-600" to="/pyqs">
-            PYQs
-          </Link>
-        </div>
+
       </div>
 
       {/* Filters */}

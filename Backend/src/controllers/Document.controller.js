@@ -5,6 +5,8 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Document } from "../models/Document.model.js";
 import { Concept } from "../models/concept.model.js";
 import mongoose from "mongoose";
+import { Student } from "../models/student.model.js";
+
 
 const uploadDocument = asyncHandler(async (req, res) => {
   const {
@@ -72,6 +74,10 @@ const uploadDocument = asyncHandler(async (req, res) => {
     uploadedBy: student._id,
     isPublic: isPublic ?? true,
     processingStatus: "pending",
+  });
+
+  await Student.findByIdAndUpdate(student._id, {
+    $inc: { "activityStats.uploads": 1 },
   });
 
   return res.status(201).json(

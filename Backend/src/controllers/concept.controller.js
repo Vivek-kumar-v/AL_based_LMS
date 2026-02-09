@@ -86,7 +86,9 @@ export const getConceptDetails = asyncHandler(async (req, res) => {
 export const getTopPYQConcepts = asyncHandler(async (req, res) => {
   const { subject, limit = 10 } = req.query;
 
-  const filters = {};
+  const filters = {
+    frequencyInPYQ: { $gt: 0 },
+  };
   if (subject) filters.subject = subject;
 
   const concepts = await Concept.find(filters)
@@ -114,9 +116,11 @@ export const getWeakConceptsForStudent = asyncHandler(async (req, res) => {
   if (!fullStudent) {
     throw new ApiError(404, "Student not found");
   }
+  console.log("conceptStats length:", fullStudent.conceptStats.length);
+
 
   const weakConcepts = fullStudent.conceptStats
-    .filter((c) => c.strengthScore <= 40)
+    .filter((c) => c.strengthScore <= 30)
     .sort((a, b) => a.strengthScore - b.strengthScore)
     .slice(0, 15);
 

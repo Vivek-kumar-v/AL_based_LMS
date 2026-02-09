@@ -80,7 +80,7 @@ def process_document_ocr(payload: OCRRequest):
     #     llmText = cleaned_text
 
     # 3) Concept extraction
-    concepts = extract_concepts(cleaned_text)
+    concepts = extract_concepts(llmText)
 
     return {
         "rawText": raw_text,

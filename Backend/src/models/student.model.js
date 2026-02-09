@@ -4,9 +4,7 @@ import jwt from "jsonwebtoken";
 
 const studentSchema = new Schema(
   {
-    // =========================
     // AUTH & IDENTITY
-    // =========================
     username: {
       type: String,
       required: true,
@@ -51,9 +49,8 @@ const studentSchema = new Schema(
       default: "student",
     },
 
-    // =========================
+
     // ACADEMIC PROFILE
-    // =========================
     collegeName: {
       type: String,
       trim: true,
@@ -74,9 +71,8 @@ const studentSchema = new Schema(
       },
     ],
 
-    // =========================
+
     // LEARNING PREFERENCES
-    // =========================
     preferences: {
       explanationStyle: {
         type: String,
@@ -91,9 +87,8 @@ const studentSchema = new Schema(
       },
     },
 
-    // =========================
+
     // CONCEPT INTELLIGENCE
-    // =========================
     conceptStats: [
       {
         conceptId: {
@@ -114,9 +109,8 @@ const studentSchema = new Schema(
       },
     ],
 
-    // =========================
+  
     // PYQ INTERACTION
-    // =========================
     pyqActivity: [
       {
         questionId: {
@@ -133,9 +127,8 @@ const studentSchema = new Schema(
       },
     ],
 
-    // =========================
+
     // REVISION & ANALYTICS
-    // =========================
     revisionHistory: [
       {
         conceptId: {

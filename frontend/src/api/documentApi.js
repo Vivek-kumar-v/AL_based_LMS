@@ -42,4 +42,4 @@ export const getDocumentByIdApi = async (documentId) => {
 
 
 export const smartSearchApi = (params) =>
-  axiosInstance.get("/documents/search", { params });
+  axiosInstance.get("/search/documents", { params });

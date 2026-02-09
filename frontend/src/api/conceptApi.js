@@ -20,6 +20,8 @@ export const getWeakConceptsApi = async () => {
   return res.data;
 };
 
-export const getConceptByIdApi = (id) => {
-  return axiosInstance.get(`/concepts/${id}`);
+export const getConceptByIdApi = async (conceptId) => {
+  const res = await axiosInstance.get(`/concepts/${conceptId}`);
+  return res.data;
 };
+

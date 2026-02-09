@@ -18,6 +18,7 @@ import EditDocument from "../pages/Documents/EditDocument";
 import UploadDocument from "../pages/Documents/UploadDocument";
 import Notes from "../pages/Documents/Notes";
 import PYQs from "../pages/Documents/PYQs";
+import ConceptDetails from "../components/concepts/ConceptDetails";
 
 const AppRoutes = () => {
   return (
@@ -55,10 +56,10 @@ const AppRoutes = () => {
       />
 
       <Route
-        path="/concepts/:id"
+        path="/concepts/:conceptId"
         element={
           <ProtectedRoute>
-            <ConceptPage />
+            <ConceptDetails />
           </ProtectedRoute>
         }
       />

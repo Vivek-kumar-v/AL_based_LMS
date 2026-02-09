@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { uploadDocumentApi, processOCRApi } from "../../api/documentApi";
-import React from "react";
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { uploadDocumentApi } from "../../api/documentApi";
 
 const UploadForm = () => {
   const [form, setForm] = useState({
@@ -56,20 +56,12 @@ const UploadForm = () => {
     try {
       setLoading(true);
 
-      // 1) Upload
       const uploadRes = await uploadDocumentApi(formData);
 
       const documentId = uploadRes?.data?._id;
+      console.log("Uploaded Document ID:", documentId);
 
-
-
-      setMessage("Document uploaded successfully ✅ ");
-
-      // 2) Auto OCR
-      // if (documentId) {
-      //   await processOCRApi(documentId);
-      //   setMessage("OCR completed successfully 🎉");
-      // }
+      setMessage("Document uploaded successfully ✅");
 
       // Reset form
       setForm({
@@ -90,97 +82,211 @@ const UploadForm = () => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white p-6 rounded-xl shadow space-y-4"
-    >
-      <h2 className="text-xl font-bold">Upload Notes / PYQ</h2>
-
-      {error && (
-        <div className="rounded bg-red-100 p-2 text-red-700">{error}</div>
-      )}
-
-      {message && (
-        <div className="rounded bg-green-100 p-2 text-green-700">
-          {message}
-        </div>
-      )}
-
-      <input
-        className="w-full border p-2 rounded"
-        placeholder="Title (Required)"
-        name="title"
-        value={form.title}
-        onChange={handleChange}
-      />
-
-      <input
-        className="w-full border p-2 rounded"
-        placeholder="Subject (Required)"
-        name="subject"
-        value={form.subject}
-        onChange={handleChange}
-      />
-
-      <textarea
-        className="w-full border p-2 rounded"
-        placeholder="Description"
-        name="description"
-        value={form.description}
-        onChange={handleChange}
-      />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <select
-          className="border p-2 rounded"
-          name="documentType"
-          value={form.documentType}
-          onChange={handleChange}
-        >
-          <option value="notes">Notes</option>
-          <option value="pyq">PYQ</option>
-        </select>
-
-        <input
-          className="border p-2 rounded"
-          placeholder="Semester"
-          name="semester"
-          value={form.semester}
-          onChange={handleChange}
-        />
-      </div>
-
-      <input
-        className="w-full border p-2 rounded"
-        placeholder="Year (only for PYQ)"
-        name="year"
-        value={form.year}
-        onChange={handleChange}
-      />
-
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          name="isPublic"
-          checked={form.isPublic}
-          onChange={handleChange}
-        />
-        <label>Make Public</label>
-      </div>
-
-      <input
-        type="file"
-        className="w-full border p-2 rounded"
-        onChange={(e) => setDocument(e.target.files[0])}
-      />
-
-      <button
-        disabled={loading}
-        className="w-full bg-black text-white rounded p-2 hover:bg-gray-800"
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-blue-50 p-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
+        className="max-w-3xl mx-auto"
       >
-        {loading ? "Uploading..." : "Upload & OCR"}
-      </button>
-    </form>
+        <motion.form
+          onSubmit={handleSubmit}
+          whileHover={{ y: -2 }}
+          className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-3xl shadow-lg p-6 md:p-8 space-y-5"
+        >
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+                Upload Notes / PYQ
+              </h2>
+              <p className="text-gray-600 mt-1 text-sm">
+                Upload your notes or PYQ and we’ll keep it organized + searchable.
+              </p>
+            </div>
+
+            <div className="hidden md:flex text-xs font-semibold px-3 py-1 rounded-full bg-blue-50 text-blue-600">
+              OCR Enabled ⚡
+            </div>
+          </div>
+
+          {/* Alerts */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-2xl border border-red-200 bg-red-50 p-3 text-red-700 font-semibold"
+            >
+              ❌ {error}
+            </motion.div>
+          )}
+
+          {message && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-2xl border border-green-200 bg-green-50 p-3 text-green-700 font-semibold"
+            >
+              ✅ {message}
+            </motion.div>
+          )}
+
+          {/* Title */}
+          <div>
+            <label className="text-sm font-bold text-gray-800">
+              Title <span className="text-red-500">*</span>
+            </label>
+            <input
+              className="mt-2 w-full border border-gray-200 bg-white rounded-2xl px-4 py-3 outline-none
+              focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              placeholder="Eg: OS Unit-3 Notes"
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* Subject */}
+          <div>
+            <label className="text-sm font-bold text-gray-800">
+              Subject <span className="text-red-500">*</span>
+            </label>
+            <input
+              className="mt-2 w-full border border-gray-200 bg-white rounded-2xl px-4 py-3 outline-none
+              focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              placeholder="Eg: Operating System"
+              name="subject"
+              value={form.subject}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="text-sm font-bold text-gray-800">
+              Description
+            </label>
+            <textarea
+              rows={3}
+              className="mt-2 w-full border border-gray-200 bg-white rounded-2xl px-4 py-3 outline-none
+              focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
+              placeholder="Write a short description..."
+              name="description"
+              value={form.description}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* Type + Semester */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-bold text-gray-800">
+                Document Type <span className="text-red-500">*</span>
+              </label>
+              <select
+                className="mt-2 w-full border border-gray-200 bg-white rounded-2xl px-4 py-3 outline-none
+                focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                name="documentType"
+                value={form.documentType}
+                onChange={handleChange}
+              >
+                <option value="notes">📒 Notes</option>
+                <option value="pyq">📝 PYQ</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-sm font-bold text-gray-800">Semester</label>
+              <input
+                className="mt-2 w-full border border-gray-200 bg-white rounded-2xl px-4 py-3 outline-none
+                focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder="Eg: 4"
+                name="semester"
+                value={form.semester}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          {/* Year */}
+          <div>
+            <label className="text-sm font-bold text-gray-800">
+              Year (only for PYQ)
+            </label>
+            <input
+              className="mt-2 w-full border border-gray-200 bg-white rounded-2xl px-4 py-3 outline-none
+              focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              placeholder="Eg: 2023"
+              name="year"
+              value={form.year}
+              onChange={handleChange}
+            />
+          </div>
+
+          {/* Public Toggle */}
+          <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
+            <div>
+              <p className="font-bold text-gray-900">Make Public</p>
+              <p className="text-xs text-gray-500">
+                Public uploads help other students too.
+              </p>
+            </div>
+
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                name="isPublic"
+                checked={form.isPublic}
+                onChange={handleChange}
+                className="sr-only peer"
+              />
+              <div className="w-12 h-7 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 transition" />
+              <div className="absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition peer-checked:translate-x-5" />
+            </label>
+          </div>
+
+          {/* File Upload */}
+          <div>
+            <label className="text-sm font-bold text-gray-800">
+              Upload File <span className="text-red-500">*</span>
+            </label>
+
+            <div className="mt-2 border-2 border-dashed border-gray-300 rounded-2xl p-5 bg-gray-50 hover:bg-gray-100 transition">
+              <input
+                type="file"
+                className="w-full cursor-pointer"
+                onChange={(e) => setDocument(e.target.files[0])}
+              />
+
+              {document && (
+                <motion.p
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-3 text-sm font-semibold text-gray-800"
+                >
+                  📄 Selected:{" "}
+                  <span className="text-blue-600">{document.name}</span>
+                </motion.p>
+              )}
+            </div>
+          </div>
+
+          {/* Submit */}
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            disabled={loading}
+            className={`w-full rounded-2xl px-4 py-3 font-bold text-white shadow-md transition
+              ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-black hover:bg-gray-900"
+              }`}
+          >
+            {loading ? "Uploading..." : "Upload"}
+          </motion.button>
+        </motion.form>
+      </motion.div>
+    </div>
   );
 };
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { getAllConceptsApi } from "../../api/conceptApi";
 import ConceptList from "../../components/concepts/ConceptList";
-import { Link } from "react-router-dom";
 
 const Concepts = () => {
   const [concepts, setConcepts] = useState([]);
@@ -13,7 +13,7 @@ const Concepts = () => {
       const res = await getAllConceptsApi();
 
       // IMPORTANT FIX (ApiResponse format)
-      setConcepts(res?.data?.data || []);
+      setConcepts(res?.data?.concepts || []);
     } catch (err) {
       console.log(err);
     } finally {
@@ -25,24 +25,63 @@ const Concepts = () => {
     fetchConcepts();
   }, []);
 
-  return (
-    <div className="p-6 max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">All Concepts</h1>
+  // Skeleton loader (if ConceptList doesn't have)
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 p-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="h-10 w-64 bg-gray-200 rounded-xl animate-pulse mb-6" />
 
-        <div className="flex gap-4">
-          <Link to="/dashboard" className="underline text-blue-600">
-            Dashboard
-          </Link>
-          <Link to="/search" className="underline text-blue-600">
-            Smart Search
-          </Link>
+          <div className="grid md:grid-cols-2 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div
+                key={i}
+                className="h-20 bg-white border border-gray-200 rounded-2xl shadow-sm animate-pulse"
+              />
+            ))}
+          </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Concept List */}
-      <ConceptList concepts={concepts} loading={loading} />
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 p-6">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
+        className="max-w-6xl mx-auto"
+      >
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+              All Concepts 🧠
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Browse all concepts and revise faster with organized topics.
+            </p>
+          </div>
+
+          <div className="px-4 py-2 rounded-2xl bg-white border border-gray-200 shadow-sm font-bold text-gray-900 w-fit">
+            Total:{" "}
+            <span className="text-blue-600 font-extrabold">
+              {concepts.length}
+            </span>
+          </div>
+        </div>
+
+        {/* Concept List Wrapper */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+          className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-3xl shadow-sm p-4 md:p-6"
+        >
+          <ConceptList concepts={concepts} loading={loading} />
+        </motion.div>
+      </motion.div>
     </div>
   );
 };

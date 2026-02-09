@@ -7,12 +7,12 @@ import {
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-
+import { motion, AnimatePresence } from "framer-motion";
 
 const DocumentCard = ({ doc, onDelete, onOCRDone }) => {
   const [ocrLoading, setOcrLoading] = useState(false);
 
-  // ✅ explain states
+  // explain states
   const [explainLoading, setExplainLoading] = useState(false);
   const [showExplain, setShowExplain] = useState(false);
   const [llmText, setLlmText] = useState("");
@@ -45,7 +45,7 @@ const DocumentCard = ({ doc, onDelete, onOCRDone }) => {
   };
 
   const handleExplain = async () => {
-    // if already fetched, just toggle
+    // already fetched → toggle only
     if (llmText) {
       setShowExplain((prev) => !prev);
       return;
@@ -53,11 +53,8 @@ const DocumentCard = ({ doc, onDelete, onOCRDone }) => {
 
     try {
       setExplainLoading(true);
-
       const res = await getDocumentLLMTextApi(doc._id);
-
       const text = res?.data?.data?.llmText || "";
-
 
       setLlmText(text);
       setShowExplain(true);
@@ -72,71 +69,98 @@ const DocumentCard = ({ doc, onDelete, onOCRDone }) => {
   const isProcessed = status === "processed";
   const isFailed = status === "failed";
 
+  const statusBadge = () => {
+    if (status === "processed") {
+      return (
+        <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700 border border-green-200">
+          Processed ✅
+        </span>
+      );
+    }
+    if (status === "failed") {
+      return (
+        <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 border border-red-200">
+          Failed ❌
+        </span>
+      );
+    }
+    return (
+      <span className="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700 border border-yellow-200">
+        Pending ⏳
+      </span>
+    );
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow p-4">
-      <div className="flex justify-between items-start gap-3">
-        <div>
-          <h2 className="text-lg font-bold">{doc.title}</h2>
-          <p className="text-sm text-gray-600">{doc.subject}</p>
-          <p className="text-xs text-gray-400">
-            {doc.documentType.toUpperCase()} • Semester: {doc.semester || "-"} •
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      whileHover={{ y: -3 }}
+      className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-3xl shadow-sm hover:shadow-md transition p-5"
+    >
+      {/* TOP SECTION */}
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+        {/* Left Info */}
+        <div className="space-y-1">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h2 className="text-lg md:text-xl font-extrabold text-gray-900 tracking-tight">
+              {doc.title}
+            </h2>
+            {statusBadge()}
+          </div>
+
+          <p className="text-sm font-semibold text-gray-700">{doc.subject}</p>
+
+          <p className="text-xs text-gray-500 font-medium">
+            {doc.documentType?.toUpperCase()} • Semester: {doc.semester || "-"} •
             Year: {doc.year || "-"}
           </p>
         </div>
 
-        <div className="flex gap-3">
+        {/* Right Actions */}
+        <div className="flex gap-2 md:gap-3 flex-wrap justify-start md:justify-end">
           <button
             onClick={() => navigate(`/documents/edit/${doc._id}`)}
-            className="text-blue-600 font-semibold"
+            className="px-4 py-2 rounded-2xl bg-blue-50 text-blue-700 font-bold hover:bg-blue-100 transition"
           >
-            Edit
+            ✏️ Edit
           </button>
 
-          <button onClick={handleDelete} className="text-red-600 font-semibold">
-            Delete
+          <button
+            onClick={handleDelete}
+            className="px-4 py-2 rounded-2xl bg-red-50 text-red-700 font-bold hover:bg-red-100 transition"
+          >
+            🗑 Delete
           </button>
         </div>
       </div>
 
-      {/* STATUS */}
-      <div className="mt-2 text-sm">
-        <span className="text-gray-500">OCR Status: </span>
-
-        {status === "pending" && (
-          <span className="font-semibold text-yellow-600">Pending</span>
-        )}
-
-        {status === "processed" && (
-          <span className="font-semibold text-green-600">Processed ✅</span>
-        )}
-
-        {status === "failed" && (
-          <span className="font-semibold text-red-600">Failed ❌</span>
-        )}
-      </div>
-
-      <div className="mt-3 flex gap-4 items-center flex-wrap">
+      {/* BUTTON ROW */}
+      <div className="mt-5 flex gap-3 items-center flex-wrap">
+        {/* Open File */}
         <a
           href={doc.fileUrl}
           target="_blank"
           rel="noreferrer"
-          className="underline text-blue-600 text-sm"
+          className="px-4 py-2 rounded-2xl bg-gray-100 text-gray-900 font-bold hover:bg-gray-200 transition"
         >
-          Open File
+          📄 Open File
         </a>
 
-        {/* OCR */}
+        {/* OCR Button */}
         {!isProcessed && (
           <button
             onClick={handleStartOCR}
             disabled={ocrLoading}
-            className={`text-sm font-semibold px-3 py-1 rounded text-white ${
-              ocrLoading
-                ? "bg-gray-400 cursor-not-allowed"
-                : isFailed
-                ? "bg-red-600 hover:bg-red-700"
-                : "bg-green-600 hover:bg-green-700"
-            }`}
+            className={`px-4 py-2 rounded-2xl font-bold text-white transition shadow-sm
+              ${
+                ocrLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : isFailed
+                  ? "bg-red-600 hover:bg-red-700"
+                  : "bg-green-600 hover:bg-green-700"
+              }`}
           >
             {ocrLoading
               ? "Running OCR..."
@@ -146,48 +170,67 @@ const DocumentCard = ({ doc, onDelete, onOCRDone }) => {
           </button>
         )}
 
+        {/* OCR Done Badge */}
         {isProcessed && (
-          <span className="text-sm font-semibold px-3 py-1 rounded bg-green-100 text-green-700">
-            OCR Done
+          <span className="px-4 py-2 rounded-2xl bg-green-50 text-green-700 font-bold border border-green-200">
+            OCR Done ✅
           </span>
         )}
 
-        {/* ✅ EXPLAIN BUTTON (ONLY IF PROCESSED) */}
+        {/* Explain Button */}
         {isProcessed && (
           <button
             onClick={handleExplain}
             disabled={explainLoading}
-            className={`text-sm font-semibold px-3 py-1 rounded text-white ${
-              explainLoading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-purple-600 hover:bg-purple-700"
-            }`}
+            className={`px-4 py-2 rounded-2xl font-bold text-white transition shadow-sm
+              ${
+                explainLoading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-purple-600 hover:bg-purple-700"
+              }`}
           >
             {explainLoading
               ? "Loading..."
               : showExplain
               ? "Hide Explain"
-              : "Explain"}
+              : "Explain ✨"}
           </button>
         )}
       </div>
 
-      {/* ✅ SHOW LLM TEXT */}
-      {isProcessed && showExplain && (
-        <div className="mt-4 border rounded-lg p-3 bg-gray-50">
-          <h3 className="font-semibold mb-2 text-gray-800">
-            Explanation (AI)
-          </h3>
+      {/* EXPLANATION SECTION */}
+      <AnimatePresence>
+        {isProcessed && showExplain && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: 10, height: 0 }}
+            transition={{ duration: 0.25 }}
+            className="mt-5 overflow-hidden"
+          >
+            <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-extrabold text-gray-900">
+                  🤖 AI Explanation
+                </h3>
 
-          <div className="prose max-w-none">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {llmText || "No explanation available."}
-            </ReactMarkdown>
-          </div>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+                  Smart Notes
+                </span>
+              </div>
 
-        </div>
-      )}
-    </div>
+              <div className="max-h-[320px] overflow-y-auto rounded-2xl border border-gray-200 bg-white p-4">
+                <div className="prose max-w-none prose-headings:font-extrabold prose-p:text-gray-700 prose-strong:text-gray-900">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {llmText || "No explanation available."}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 

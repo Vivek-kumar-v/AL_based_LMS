@@ -5,6 +5,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Document } from "../models/Document.model.js";
 import { Concept } from "../models/concept.model.js";
 import { normalizeConceptName } from "../utils/conceptNormalizer.js";
+import { Student } from "../models/student.model.js";
+
 
 /**
  * GET /api/v1/search/documents?keyword=&subject=&semester=&documentType=&concept=
@@ -63,6 +65,12 @@ export const smartSearchDocuments = asyncHandler(async (req, res) => {
     .populate("uploadedBy", "fullName username avatar")
     .populate("extractedConcepts", "displayName subject")
     .select("-rawText -cleanedText -llmText");
+
+    if (req.student?._id) {
+      await Student.findByIdAndUpdate(req.student._id, {
+        $inc: { "activityStats.searches": 1 },
+      });
+    }  
 
   return res.status(200).json(
     new ApiResponse(200, documents, "Search results fetched successfully")

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { getDocumentByIdApi, updateDocumentApi } from "../../api/documentApi";
+import toast from "react-hot-toast";
 
 const EditDocument = () => {
   const { documentId } = useParams();
@@ -8,9 +10,6 @@ const EditDocument = () => {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
 
   const [form, setForm] = useState({
     title: "",
@@ -24,10 +23,8 @@ const EditDocument = () => {
   const fetchDocument = async () => {
     try {
       setLoading(true);
-      setError("");
 
       const res = await getDocumentByIdApi(documentId);
-
       const doc = res?.data;
 
       setForm({
@@ -39,7 +36,7 @@ const EditDocument = () => {
         isPublic: doc?.isPublic ?? true,
       });
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to fetch document");
+      toast.error(err?.response?.data?.message || "Failed to fetch document");
     } finally {
       setLoading(false);
     }
@@ -60,126 +57,193 @@ const EditDocument = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
-  
+
     try {
       setSaving(true);
-  
-      // ✅ Send only fields that are filled / changed
+
       const payload = {};
-  
+
       if (form.title.trim() !== "") payload.title = form.title.trim();
       if (form.description !== undefined) payload.description = form.description;
       if (form.subject.trim() !== "") payload.subject = form.subject.trim();
-  
-      // semester/year optional
+
       if (form.semester !== "") payload.semester = form.semester;
       if (form.year !== "") payload.year = form.year;
-  
+
       payload.isPublic = form.isPublic;
-  
+
       await updateDocumentApi(documentId, payload);
-  
-      setMessage("Document updated successfully ✅");
-  
+
+      toast.success("Document updated successfully ✅");
+
       setTimeout(() => {
         navigate("/notes");
-      }, 800);
+      }, 900);
     } catch (err) {
-      setError(err?.response?.data?.message || "Update failed");
+      toast.error(err?.response?.data?.message || "Update failed");
     } finally {
       setSaving(false);
     }
   };
-  
 
-  if (loading) return <div className="p-6">Loading document...</div>;
+  // Loading UI
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 p-6">
+        <div className="max-w-3xl mx-auto">
+          <div className="h-10 w-60 bg-gray-200 rounded-xl animate-pulse mb-6" />
+          <div className="bg-white border border-gray-200 rounded-3xl shadow-sm p-6 space-y-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div
+                key={i}
+                className="h-12 bg-gray-100 rounded-2xl animate-pulse"
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Edit Document</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 p-6">
+      <motion.div
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
+        className="max-w-3xl mx-auto"
+      >
+        <div className="bg-white/80 backdrop-blur-xl border border-gray-200 rounded-3xl shadow-lg p-6 md:p-8">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                Edit Document ✏️
+              </h1>
+              <p className="text-gray-600 mt-1 text-sm">
+                Update title, subject, description and visibility.
+              </p>
+            </div>
 
-          <Link className="underline text-blue-600" to="/notes">
-            Back
-          </Link>
+            <Link
+              className="px-4 py-2 rounded-2xl bg-gray-100 text-gray-900 font-bold hover:bg-gray-200 transition w-fit"
+              to="/notes"
+            >
+              ← Back
+            </Link>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleUpdate} className="space-y-5">
+            {/* Title */}
+            <div>
+              <label className="text-sm font-bold text-gray-800">Title</label>
+              <input
+                className="mt-2 w-full border border-gray-200 bg-white rounded-2xl px-4 py-3 outline-none
+                focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder="Title"
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+              />
+            </div>
+
+            {/* Subject */}
+            <div>
+              <label className="text-sm font-bold text-gray-800">Subject</label>
+              <input
+                className="mt-2 w-full border border-gray-200 bg-white rounded-2xl px-4 py-3 outline-none
+                focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                placeholder="Subject"
+                name="subject"
+                value={form.subject}
+                onChange={handleChange}
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="text-sm font-bold text-gray-800">
+                Description
+              </label>
+              <textarea
+                rows={4}
+                className="mt-2 w-full border border-gray-200 bg-white rounded-2xl px-4 py-3 outline-none
+                focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
+                placeholder="Description"
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+              />
+            </div>
+
+            {/* Semester + Year */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-bold text-gray-800">
+                  Semester
+                </label>
+                <input
+                  className="mt-2 w-full border border-gray-200 bg-white rounded-2xl px-4 py-3 outline-none
+                  focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  placeholder="Semester"
+                  name="semester"
+                  value={form.semester}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-bold text-gray-800">Year</label>
+                <input
+                  className="mt-2 w-full border border-gray-200 bg-white rounded-2xl px-4 py-3 outline-none
+                  focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  placeholder="Year"
+                  name="year"
+                  value={form.year}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            {/* Public Toggle */}
+            <div className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
+              <div>
+                <p className="font-bold text-gray-900">Make Public</p>
+                <p className="text-xs text-gray-500">
+                  Public documents can be accessed by other students.
+                </p>
+              </div>
+
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="isPublic"
+                  checked={form.isPublic}
+                  onChange={handleChange}
+                  className="sr-only peer"
+                />
+                <div className="w-12 h-7 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 transition" />
+                <div className="absolute left-1 top-1 w-5 h-5 bg-white rounded-full transition peer-checked:translate-x-5" />
+              </label>
+            </div>
+
+            {/* Button */}
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              disabled={saving}
+              className={`w-full rounded-2xl px-4 py-3 font-extrabold text-white shadow-md transition
+                ${
+                  saving
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-black hover:bg-gray-900"
+                }`}
+            >
+              {saving ? "Saving..." : "Update Document 🚀"}
+            </motion.button>
+          </form>
         </div>
-
-        {error && (
-          <div className="mb-3 rounded bg-red-100 p-2 text-red-700">
-            {error}
-          </div>
-        )}
-
-        {message && (
-          <div className="mb-3 rounded bg-green-100 p-2 text-green-700">
-            {message}
-          </div>
-        )}
-
-        <form onSubmit={handleUpdate} className="space-y-4">
-          <input
-            className="w-full border p-2 rounded"
-            placeholder="Title"
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-          />
-
-          <input
-            className="w-full border p-2 rounded"
-            placeholder="Subject"
-            name="subject"
-            value={form.subject}
-            onChange={handleChange}
-          />
-
-          <textarea
-            className="w-full border p-2 rounded"
-            placeholder="Description"
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-          />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input
-              className="border p-2 rounded"
-              placeholder="Semester"
-              name="semester"
-              value={form.semester}
-              onChange={handleChange}
-            />
-
-            <input
-              className="border p-2 rounded"
-              placeholder="Year"
-              name="year"
-              value={form.year}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              name="isPublic"
-              checked={form.isPublic}
-              onChange={handleChange}
-            />
-            <label>Make Public</label>
-          </div>
-
-          <button
-            disabled={saving}
-            className="w-full bg-black text-white rounded p-2 hover:bg-gray-800"
-          >
-            {saving ? "Saving..." : "Update Document"}
-          </button>
-        </form>
-      </div>
+      </motion.div>
     </div>
   );
 };
