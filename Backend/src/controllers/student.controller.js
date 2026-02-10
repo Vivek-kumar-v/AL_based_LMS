@@ -275,5 +275,158 @@ const getStudentProfile = asyncHandler(async (req, res) => {
     );
   });
 
+  const updateStudentProfile = asyncHandler(async (req, res) => {
+    const studentId = req.student?._id;
+  
+    if (!studentId) {
+      throw new ApiError(401, "Unauthorized request");
+    }
+  
+    const {
+      fullName,
+      username,
+      collegeName,
+      department,
+      semester,
+      avatar,
+    } = req.body;
+  
+    // Find current student
+    const student = await Student.findById(studentId);
+  
+    if (!student) {
+      throw new ApiError(404, "Student not found");
+    }
+  
+    // ✅ If username is being updated → check uniqueness
+    if (username && username !== student.username) {
+      const existingUsername = await Student.findOne({ username });
+  
+      if (existingUsername) {
+        throw new ApiError(409, "Username already taken");
+      }
+    }
+  
+    // ✅ Update only fields provided
+    if (fullName !== undefined) student.fullName = fullName;
+    if (username !== undefined) student.username = username;
+    if (collegeName !== undefined) student.collegeName = collegeName;
+    if (department !== undefined) student.department = department;
+    if (semester !== undefined) student.semester = semester;
+  
+    // Avatar URL (Cloudinary)
+    if (avatar !== undefined) student.avatar = avatar;
+  
+    await student.save({ validateBeforeSave: false });
+  
+    const updatedStudent = await Student.findById(studentId).select(
+      "-password -refreshToken"
+    );
+  
+    return res
+      .status(200)
+      .json(new ApiResponse(200, { student: updatedStudent }, "Profile updated successfully"));
+  });
 
-export { registerStudent ,loginStudent,logoutStudent,refreshAccessToken,getStudentProfile};
+  const uploadStudentAvatar = asyncHandler(async (req, res) => {
+    const studentId = req.student?._id;
+  
+    if (!studentId) {
+      throw new ApiError(401, "Unauthorized request");
+    }
+  
+    const avatarLocalPath = req.file?.path;
+  
+    if (!avatarLocalPath) {
+      throw new ApiError(400, "Avatar file is required");
+    }
+  
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+  
+    if (!avatar?.url) {
+      throw new ApiError(500, "Failed to upload avatar");
+    }
+  
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        { avatarUrl: avatar.url },
+        "Avatar uploaded successfully"
+      )
+    );
+  });
+  
+  const changeStudentPassword = asyncHandler(async (req, res) => {
+    const studentId = req.student?._id;
+  
+    if (!studentId) {
+      throw new ApiError(401, "Unauthorized request");
+    }
+  
+    const { oldPassword, newPassword } = req.body;
+    console.log(oldPassword)
+  
+    if (!oldPassword || !newPassword) {
+      throw new ApiError(400, "Old password and new password are required");
+    }
+  
+    if (newPassword.length < 6) {
+      throw new ApiError(400, "Password must be at least 6 characters");
+    }
+  
+    const student = await Student.findById(studentId).select("+password");
+  
+    if (!student) {
+      throw new ApiError(404, "Student not found");
+    }
+  
+    // ✅ Check old password
+    const isOldPasswordCorrect = await student.isPasswordCorrect(oldPassword);
+  
+    if (!isOldPasswordCorrect) {
+      throw new ApiError(401, "Old password is incorrect");
+    }
+  
+    // ✅ Update password
+    student.password = newPassword;
+  
+    // IMPORTANT: validateBeforeSave MUST be true here (password hashing middleware)
+    await student.save();
+  
+    return res.status(200).json(
+      new ApiResponse(200, null, "Password updated successfully")
+    );
+  });
+  
+  const deleteStudentAccount = asyncHandler(async (req, res) => {
+    const studentId = req.student?._id;
+  
+    if (!studentId) {
+      throw new ApiError(401, "Unauthorized request");
+    }
+  
+    const student = await Student.findById(studentId);
+  
+    if (!student) {
+      throw new ApiError(404, "Student not found");
+    }
+  
+    // ✅ Delete student
+    await Student.findByIdAndDelete(studentId);
+  
+    // Clear cookies (same as logout)
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+    };
+  
+    return res
+      .status(200)
+      .clearCookie("accessToken", cookieOptions)
+      .clearCookie("refreshToken", cookieOptions)
+      .json(new ApiResponse(200, null, "Account deleted successfully"));
+  });
+  
+
+export { registerStudent ,loginStudent,logoutStudent,refreshAccessToken,getStudentProfile, updateStudentProfile, uploadStudentAvatar, changeStudentPassword, deleteStudentAccount };

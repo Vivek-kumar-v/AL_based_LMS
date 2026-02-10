@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getStudentProfile, loginStudent, logoutStudent, refreshAccessToken, registerStudent } from "../controllers/student.controller.js"
+import { changeStudentPassword, deleteStudentAccount, getStudentProfile, loginStudent, logoutStudent, refreshAccessToken, registerStudent, updateStudentProfile, uploadStudentAvatar } from "../controllers/student.controller.js"
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -12,6 +12,20 @@ router.route("/register").post(
 
 router.route("/login").post(loginStudent)
 router.route("/profile").get(verifyJWT,getStudentProfile);
+
+router.put("/update-profile", verifyJWT, updateStudentProfile);
+
+router.put("/change-password", verifyJWT, changeStudentPassword);
+
+router.delete("/delete-account", verifyJWT, deleteStudentAccount);
+
+
+router.post(
+  "/upload-avatar",
+  verifyJWT,
+  upload.single("avatar"),
+  uploadStudentAvatar
+);
 
 
 // secured routes

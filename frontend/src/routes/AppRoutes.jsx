@@ -19,6 +19,9 @@ import UploadDocument from "../pages/Documents/UploadDocument";
 import Notes from "../pages/Documents/Notes";
 import PYQs from "../pages/Documents/PYQs";
 import ConceptDetails from "../components/concepts/ConceptDetails";
+import EditProfile from "../pages/Profile/EditProfile";
+import Settings from "../pages/setting/Settings";
+import ChangePassword from "../pages/setting/ChangePassword";
 
 const AppRoutes = () => {
   return (
@@ -64,6 +67,9 @@ const AppRoutes = () => {
         }
       />
 
+    <Route path="/profile/edit" element={<EditProfile />} />
+
+
 
 
       <Route
@@ -103,6 +109,9 @@ const AppRoutes = () => {
       />
 
     <Route path="/documents/edit/:documentId" element={<EditDocument />} />
+    <Route path="/settings" element={<Settings />} />
+    <Route path="/settings/change-password" element={<ChangePassword />} />
+
 
 
 

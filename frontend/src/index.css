@@ -1,1 +1,4 @@
 @import "tailwindcss";
+
+/* ✅ REQUIRED FOR DARK MODE IN TAILWIND v4 */
+@custom-variant dark (&:where(.dark, .dark *));
