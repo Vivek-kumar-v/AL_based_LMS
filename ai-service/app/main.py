@@ -17,8 +17,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ Root route (Render + browser friendly)
-@app.get("/")
+# ✅ Root route (GET + HEAD)
+@app.api_route("/", methods=["GET", "HEAD"])
 def root():
     return {
         "status": "ok",
@@ -26,8 +26,8 @@ def root():
         "timestamp": datetime.utcnow().isoformat()
     }
 
-# ✅ Health check route
-@app.get("/health")
+# ✅ Health check route (GET + HEAD)
+@app.api_route("/health", methods=["GET", "HEAD"])
 def health():
     return {
         "status": "ok",

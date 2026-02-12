@@ -117,7 +117,7 @@ You MUST NOT:
 - Remove original meaning
 - Introduce explanations or examples
 
-Do NOT summarize.
+Do summarize.
 Do NOT invent content.
 
 OCR TEXT:
