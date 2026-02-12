@@ -10,7 +10,7 @@ import { Student } from "../models/student.model.js";
 
 const processDocumentOCR = asyncHandler(async (req, res) => {
   const { documentId } = req.params;
-
+  console.log("api hit: ")
   // VALIDATE DOCUMENT ID
   if (!mongoose.Types.ObjectId.isValid(documentId)) {
     throw new ApiError(400, "Invalid document ID");
@@ -46,6 +46,7 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
     if (!OCR_URL) {
       throw new ApiError(500, "OCR_SERVER_URL is missing in .env");
     }
+    console.log(OCR_URL)
     ocrResponse = await axios.post(
       `${OCR_URL}/ocr/`,
       {
@@ -56,6 +57,9 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
         timeout: 600000,
       }
     );
+    console.log('====================================');
+    console.log("Ocr success");
+    console.log('====================================');
   } catch (err) {
     console.error("===== OCR SERVICE ERROR =====");
     console.error("Message:", err.message);
