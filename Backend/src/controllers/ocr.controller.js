@@ -7,19 +7,21 @@ import { Document } from "../models/Document.model.js";
 import { Concept } from "../models/concept.model.js";
 import { normalizeConceptName } from "../utils/conceptNormalizer.js";
 import { Student } from "../models/student.model.js";
+import dotenv from 'dotenv'
+dotenv.config();
 
 const processDocumentOCR = asyncHandler(async (req, res) => {
   const { documentId } = req.params;
-  console.log("log")
+  console.log("api hit:: 1")
   // VALIDATE DOCUMENT ID
   if (!mongoose.Types.ObjectId.isValid(documentId)) {
-    res.status(500).json(ApiError(400, "Invalid document ID"));
+    res.status(500).json(new ApiError(400, "Invalid document ID"));
   }
 
   const document = await Document.findById(documentId);
 
   if (!document) {
-    res.status(500).json(ApiError(404, "Document not found"));
+    res.status(500).json(new ApiError(404, "Document not found"));
   }
 
   if (document.processingStatus === "processed") {
@@ -36,15 +38,15 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
   } else if (document.fileType === "image") {
     normalizedFileType = "image";
   } else {
-    res.status(500).json(ApiError(400, "Unsupported file type for OCR"));
+    res.status(500).json(new ApiError(400, "Unsupported file type for OCR"));
   }
-
+  console.log("status: 2")
   // CALL PYTHON OCR SERVICE
   let ocrResponse;
   try {
     const OCR_URL = process.env.OCR_SERVER_URL;
     if (!OCR_URL) {
-      res.status(500).json(ApiError(500, "OCR_SERVER_URL is missing in .env"));
+      res.status(500).json(new ApiError(500, "OCR_SERVER_URL is missing in .env"));
     }
     console.log(OCR_URL)
     ocrResponse = await axios.post(
@@ -65,11 +67,12 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
     console.error("Message:", err.message);
     console.error("Status:", err.response?.status);
     console.error("Data:", err.response?.data);
+    console.log(err)
 
     document.processingStatus = "failed";
     await document.save();
 
-    res.status(500).json(ApiError(500, "OCR service failed"));
+    res.status(500).json(new ApiError(500, "OCR service failed"));
   }
 
   const { rawText, cleanedText, llmText, concepts } = ocrResponse.data;
