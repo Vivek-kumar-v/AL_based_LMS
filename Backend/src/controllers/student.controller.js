@@ -104,7 +104,7 @@ const registerStudent = asyncHandler(async (req, res) => {
 const loginStudent = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
 
-
+  console.log('Login attempt with:', { email, username });
   // VALIDATION
   if (!(email || username) || !password) {
     throw new ApiError(400, "Email/Username and password are required");
@@ -118,7 +118,7 @@ const loginStudent = asyncHandler(async (req, res) => {
   if (!student) {
     throw new ApiError(404, "Student does not exist");
   }
-
+  console.log("Student found:", student);
 
   // PASSWORD CHECK
   const isPasswordValid = await student.isPasswordCorrect(password);
@@ -150,7 +150,7 @@ const loginStudent = asyncHandler(async (req, res) => {
     sameSite: "lax",
   };
   
-
+  console.log("Reached here after generating tokens and saving refresh token. Preparing response...");
 
   // RESPONSE
   return res
