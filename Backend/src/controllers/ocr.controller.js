@@ -42,8 +42,12 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
   // CALL PYTHON OCR SERVICE
   let ocrResponse;
   try {
+    const OCR_URL = process.env.OCR_SERVER_URL;
+    if (!OCR_URL) {
+      throw new ApiError(500, "OCR_SERVER_URL is missing in .env");
+    }
     ocrResponse = await axios.post(
-      "http://127.0.0.1:8001/ocr/",
+      `${OCR_URL}/ocr/`,
       {
         fileUrl: document.fileUrl,
         fileType: normalizedFileType,
