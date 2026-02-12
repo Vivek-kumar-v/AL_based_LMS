@@ -12,7 +12,7 @@ dotenv.config();
 
 const processDocumentOCR = asyncHandler(async (req, res) => {
   const { documentId } = req.params;
-  console.log("api hit:: 1")
+
   // VALIDATE DOCUMENT ID
   if (!mongoose.Types.ObjectId.isValid(documentId)) {
     res.status(500).json(new ApiError(400, "Invalid document ID"));
@@ -40,7 +40,7 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
   } else {
     res.status(500).json(new ApiError(400, "Unsupported file type for OCR"));
   }
-  console.log("status: 2")
+ 
   // CALL PYTHON OCR SERVICE
   let ocrResponse;
   try {
@@ -59,11 +59,8 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
         timeout: 600000,
       }
     );
-    console.log('====================================');
-    console.log("Ocr success");
-    console.log('====================================');
   } catch (err) {
-    console.log("OCR SERVICE ERROR:", error.message);
+    console.log("OCR SERVICE ERROR:", err.message);
 
     const status = error?.response?.status || 500;
     const data = error?.response?.data || "OCR Service Failed";
