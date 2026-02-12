@@ -43,8 +43,8 @@ def length_safety_check(input_text: str, output_text: str, max_ratio: float = 3.
 
 def keyword_coverage_check(input_text: str, output_text: str, threshold: float = 0.15) -> bool:
     """
-    Ensures the output isn't hallucinated nonsense by checking if 
-    it contains at least 40% of the original unique big words.
+    Ensures the output isn't hallucinated nonsense by checking if
+    it contains at least 15% of the original unique big words.
     """
     input_words = set(re.findall(r"\b[a-zA-Z]{4,}\b", input_text.lower()))
     output_words = set(re.findall(r"\b[a-zA-Z]{4,}\b", output_text.lower()))
@@ -68,12 +68,12 @@ def extract_text_from_response(response) -> Optional[str]:
             return None
 
         candidate = response.candidates[0]
-        
+
         # Log unexpected finish reasons
         if candidate.finish_reason != "STOP":
             print(f"⚠️ Gemini stopped due to reason: {candidate.finish_reason}")
             # If max tokens hit, we usually still want the partial text
-            if candidate.finish_reason != "MAX_TOKENS": 
+            if candidate.finish_reason != "MAX_TOKENS":
                 return None
 
         if not candidate.content or not candidate.content.parts:
@@ -84,12 +84,12 @@ def extract_text_from_response(response) -> Optional[str]:
         for part in candidate.content.parts:
             if hasattr(part, "text") and part.text:
                 text_parts.append(part.text)
-        
+
         extracted_text = "".join(text_parts).strip()
-        
+
         if not extracted_text:
             return None
-            
+
         return extracted_text
 
     except Exception as e:
@@ -130,29 +130,29 @@ OCR TEXT:
 
 # MAIN REFINEMENT FUNCTION
 
-
-# MAIN REFINEMENT FUNCTION (WITH SUCCESS LOGS)
-
-def refine_text_with_gemini(cleaned_text: str) -> Optional[str]:
+def refine_text_with_gemini(cleaned_text: str) -> str:
     """
     Refines text using 'gemini-2.5-flash-preview-09-2025'.
-    - Includes SUCCESS LOGGING to verify output.
-    - Handles Input Truncation & Retries.
+
+    ✅ IMPORTANT:
+    - This function NEVER returns None.
+    - If Gemini fails/rejects output, it returns cleaned_text as fallback.
     """
 
+    # If disabled → return original text
     if not ENABLE_LLM:
         print("ℹ️ Gemini LLM disabled via configuration")
-        return None
+        return cleaned_text
 
     if not client:
         print("⚠️ Gemini client not initialized")
-        return None
+        return cleaned_text
 
-    if not cleaned_text.strip():
-        return None
+    if not cleaned_text or not cleaned_text.strip():
+        return cleaned_text
 
-    # 1. INPUT TRUNCATION
-    SAFE_CHAR_LIMIT = 25000 
+    # 1) INPUT TRUNCATION
+    SAFE_CHAR_LIMIT = 25000
     if len(cleaned_text) > SAFE_CHAR_LIMIT:
         print(f"⚠️ Input too long ({len(cleaned_text)} chars). Truncating to {SAFE_CHAR_LIMIT}...")
         cleaned_text = cleaned_text[:SAFE_CHAR_LIMIT] + "... [TRUNCATED]"
@@ -166,11 +166,11 @@ def refine_text_with_gemini(cleaned_text: str) -> Optional[str]:
     ]
 
     MAX_RETRIES = 5
-    
+
     for attempt in range(MAX_RETRIES):
         try:
             print(f"🔄 Sending request to Gemini (Attempt {attempt+1}/{MAX_RETRIES})...")
-            
+
             start_time = time.time()
             response = client.models.generate_content(
                 model="gemini-2.5-flash-preview-09-2025",
@@ -190,50 +190,50 @@ def refine_text_with_gemini(cleaned_text: str) -> Optional[str]:
 
             refined_text = extract_text_from_response(response)
 
+            # If empty → fallback
             if not refined_text:
-                print("⚠️ Received empty response from Gemini.")
-                return None
+                print("⚠️ Received empty response from Gemini. Using fallback.")
+                return cleaned_text
 
-       
             # OUTPUT SAFETY VALIDATIONS
 
-            # Check 1: Length Ratio (Relaxed to 3.0)
+            # Check 1: Length Ratio
             if not length_safety_check(cleaned_text, refined_text, max_ratio=3.0):
                 print("⚠️ Output rejected: Excessive expansion.")
                 print(f"   Input Length: {len(cleaned_text)} -> Output Length: {len(refined_text)}")
-                return None
+                return cleaned_text  # ✅ fallback instead of None
 
             # Check 2: Keyword Coverage
             if not keyword_coverage_check(cleaned_text, refined_text):
                 print("⚠️ Output rejected: Keyword coverage too low (potential hallucination).")
-                return None
+                return cleaned_text  # ✅ fallback
 
-    
             # SUCCESS LOGGING
             print(f"✅ Gemini Refinement Successful! (Time: {elapsed:.2f}s)")
             print(f"   Input Length: {len(cleaned_text)} chars")
             print(f"   Output Length: {len(refined_text)} chars")
-            print(f"   Preview: {refined_text[:100].replace(chr(10), ' ')}...") # Print first 100 chars
-            
+            print(f"   Preview: {refined_text[:100].replace(chr(10), ' ')}...")
+
             return refined_text
 
         except Exception as e:
             error_str = str(e)
-            
+
             # Handle Rate Limits
             if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str or "503" in error_str:
                 sleep_time = (2 ** attempt) + 2
                 print(f"⏳ Quota exceeded. Waiting {sleep_time}s...")
                 time.sleep(sleep_time)
-            
+                continue  # ✅ retry
+
             # Handle Not Found
             elif "404" in error_str and "NOT_FOUND" in error_str:
                 print(f"❌ Model 'gemini-2.5-flash-preview-09-2025' not found.")
-                return None
-            
+                return cleaned_text
+
             else:
                 print(f"🔥 Gemini fatal error: {error_str}")
-                return None
+                return cleaned_text
 
     print("❌ Max retries reached. Skipping LLM refinement.")
-    return None
+    return cleaned_text
