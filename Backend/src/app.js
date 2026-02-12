@@ -8,7 +8,7 @@ const app = express()
 
 app.use(
     cors({
-      origin: "http://localhost:5173", // Vite frontend
+      origin: process.env.CORS_ORIGIN, // Vite frontend
       credentials: true
     })
   );
