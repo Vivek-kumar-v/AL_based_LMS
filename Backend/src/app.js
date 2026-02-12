@@ -26,6 +26,10 @@ app.use(
   import revisionRoutes from "./routes/revision.routes.js";
   import conceptRoutes from "./routes/concept.routes.js";
 
+  // health-check endpoint
+  app.get("/api/v1/health", (req, res) => {
+    res.status(200).json({ status: "ok", timestamp: new Date().toISOString() })
+  })
 
   // Routes setup
   app.use("/api/v1/users", studentRoute)
