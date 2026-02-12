@@ -62,8 +62,13 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
   } catch (err) {
     console.log("OCR SERVICE ERROR:", err.message);
 
+    document.processingStatus = "failed";
+    document.processedAt = new Date();
+    await document.save();
+
     const status = error?.response?.status || 500;
     const data = error?.response?.data || "OCR Service Failed";
+    
 
     return res.status(status).json({
       success: false,
