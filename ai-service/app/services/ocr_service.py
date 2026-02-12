@@ -9,12 +9,13 @@ from app.services.text_refinement import refine_text
 from app.services.gemini_refinement import refine_text_with_gemini
 from app.services.concept_extraction import extract_concepts
 from app.models.schemas import OCRRequest
-from app.core.config import TESSERACT_PATH
+import shutil
+import pytesseract
+
 
 
 # ✅ Tesseract path setup
-if TESSERACT_PATH:
-    pytesseract.pytesseract.tesseract_cmd = TESSERACT_PATH
+pytesseract.pytesseract.tesseract_cmd = shutil.which("tesseract")
 
 
 # IMAGE OCR
