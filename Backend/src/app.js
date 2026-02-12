@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
+import axios from "axios";
 
 
 const app = express()
@@ -30,6 +31,29 @@ app.use(
   app.get("/api/v1/health", (req, res) => {
     res.status(200).json({ status: "ok", timestamp: new Date().toISOString() })
   })
+
+  app.get("/api/v1/health/ocr", async (req, res) => {
+    try {
+      const OCR_URL = process.env.OCR_SERVER_URL;
+  
+      const response = await axios.get(`${OCR_URL}/health`, {
+        timeout: 10000,
+      });
+  
+      return res.status(200).json({
+        status: "ok",
+        ocr: response.data,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err) {
+      return res.status(500).json({
+        status: "fail",
+        message: "OCR service is down",
+        error: err.message,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  });
 
   // Routes setup
   app.use("/api/v1/users", studentRoute)
