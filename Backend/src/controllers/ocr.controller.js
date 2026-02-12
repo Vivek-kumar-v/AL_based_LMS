@@ -63,16 +63,16 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
     console.log("Ocr success");
     console.log('====================================');
   } catch (err) {
-    console.error("===== OCR SERVICE ERROR =====");
-    console.error("Message:", err.message);
-    console.error("Status:", err.response?.status);
-    console.error("Data:", err.response?.data);
-    console.log(err)
+    console.log("OCR SERVICE ERROR:", error.message);
 
-    document.processingStatus = "failed";
-    await document.save();
+    const status = error?.response?.status || 500;
+    const data = error?.response?.data || "OCR Service Failed";
 
-    res.status(500).json(new ApiError(500, "OCR service failed"));
+    return res.status(status).json({
+      success: false,
+      message: "OCR Service Error",
+      error: data,
+    });
   }
 
   const { rawText, cleanedText, llmText, concepts } = ocrResponse.data;
