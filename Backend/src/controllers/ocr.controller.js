@@ -10,16 +10,16 @@ import { Student } from "../models/student.model.js";
 
 const processDocumentOCR = asyncHandler(async (req, res) => {
   const { documentId } = req.params;
-  console.log("api hit: ")
+  console.log("log")
   // VALIDATE DOCUMENT ID
   if (!mongoose.Types.ObjectId.isValid(documentId)) {
-    throw new ApiError(400, "Invalid document ID");
+    res.status(500).json(ApiError(400, "Invalid document ID"));
   }
 
   const document = await Document.findById(documentId);
 
   if (!document) {
-    throw new ApiError(404, "Document not found");
+    res.status(500).json(ApiError(404, "Document not found"));
   }
 
   if (document.processingStatus === "processed") {
@@ -36,7 +36,7 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
   } else if (document.fileType === "image") {
     normalizedFileType = "image";
   } else {
-    throw new ApiError(400, "Unsupported file type for OCR");
+    res.status(500).json(ApiError(400, "Unsupported file type for OCR"));
   }
 
   // CALL PYTHON OCR SERVICE
@@ -44,7 +44,7 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
   try {
     const OCR_URL = process.env.OCR_SERVER_URL;
     if (!OCR_URL) {
-      throw new ApiError(500, "OCR_SERVER_URL is missing in .env");
+      res.status(500).json(ApiError(500, "OCR_SERVER_URL is missing in .env"));
     }
     console.log(OCR_URL)
     ocrResponse = await axios.post(
@@ -69,7 +69,7 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
     document.processingStatus = "failed";
     await document.save();
 
-    throw new ApiError(500, "OCR service failed");
+    res.status(500).json(ApiError(500, "OCR service failed"));
   }
 
   const { rawText, cleanedText, llmText, concepts } = ocrResponse.data;
