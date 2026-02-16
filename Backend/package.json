@@ -28,6 +28,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.5",
     "multer": "^2.0.2",
+    "node-cron": "^4.2.1",
     "tsc": "^2.0.4"
   }
 }
