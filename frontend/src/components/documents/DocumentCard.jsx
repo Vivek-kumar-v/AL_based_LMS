@@ -112,6 +112,28 @@ const DocumentCard = ({ doc, onDelete, onOCRDone }) => {
 
           <p className="text-sm font-semibold text-gray-700">{doc.subject}</p>
 
+          {/* Uploader Info */}
+          {doc?.uploadedBy && (
+            <div className="flex items-center gap-2 mt-2">
+              <img
+                src={
+                  doc.uploadedBy.avatar ||
+                  `https://ui-avatars.com/api/?name=${doc.uploadedBy.fullName || "User"}`
+                }
+                alt="uploader"
+                className="w-7 h-7 rounded-full object-cover border border-gray-300"
+              />
+
+              <p className="text-xs font-bold text-gray-700">
+                Uploaded by{" "}
+                <span className="text-blue-600">
+                  {doc.uploadedBy.fullName || "Unknown"}
+                </span>
+              </p>
+            </div>
+          )}
+
+
           <p className="text-xs text-gray-500 font-medium">
             {doc.documentType?.toUpperCase()} • Semester: {doc.semester || "-"} •
             Year: {doc.year || "-"}
