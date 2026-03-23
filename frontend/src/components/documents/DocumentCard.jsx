@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   deleteDocumentApi,
   processOCRApi,
@@ -17,7 +17,17 @@ const DocumentCard = ({ doc, onDelete, onOCRDone }) => {
   const [showExplain, setShowExplain] = useState(false);
   const [llmText, setLlmText] = useState("");
 
+  // 🔊 speech state
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
   const navigate = useNavigate();
+
+  // 🔊 stop speech on unmount (important!)
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
 
   const handleDelete = async () => {
     if (!confirm("Delete this document?")) return;
@@ -45,7 +55,6 @@ const DocumentCard = ({ doc, onDelete, onOCRDone }) => {
   };
 
   const handleExplain = async () => {
-    // already fetched → toggle only
     if (llmText) {
       setShowExplain((prev) => !prev);
       return;
@@ -63,6 +72,31 @@ const DocumentCard = ({ doc, onDelete, onOCRDone }) => {
     } finally {
       setExplainLoading(false);
     }
+  };
+
+  // 🔊 TEXT TO SPEECH FUNCTION
+  const handleSpeak = () => {
+    if (!llmText) return;
+
+    // stop if already speaking
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    // cancel any previous speech
+    window.speechSynthesis.cancel();
+
+    const speech = new SpeechSynthesisUtterance(llmText);
+
+    speech.lang = "en-US";
+    speech.rate = 1;
+
+    speech.onend = () => setIsSpeaking(false);
+
+    window.speechSynthesis.speak(speech);
+    setIsSpeaking(true);
   };
 
   const status = doc?.processingStatus || "pending";
@@ -101,7 +135,6 @@ const DocumentCard = ({ doc, onDelete, onOCRDone }) => {
     >
       {/* TOP SECTION */}
       <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-        {/* Left Info */}
         <div className="space-y-1">
           <div className="flex items-center gap-3 flex-wrap">
             <h2 className="text-lg md:text-xl font-extrabold text-gray-900 tracking-tight">
@@ -112,7 +145,6 @@ const DocumentCard = ({ doc, onDelete, onOCRDone }) => {
 
           <p className="text-sm font-semibold text-gray-700">{doc.subject}</p>
 
-          {/* Uploader Info */}
           {doc?.uploadedBy && (
             <div className="flex items-center gap-2 mt-2">
               <img
@@ -133,25 +165,23 @@ const DocumentCard = ({ doc, onDelete, onOCRDone }) => {
             </div>
           )}
 
-
           <p className="text-xs text-gray-500 font-medium">
             {doc.documentType?.toUpperCase()} • Semester: {doc.semester || "-"} •
             Year: {doc.year || "-"}
           </p>
         </div>
 
-        {/* Right Actions */}
-        <div className="flex gap-2 md:gap-3 flex-wrap justify-start md:justify-end">
+        <div className="flex gap-2 md:gap-3 flex-wrap">
           <button
             onClick={() => navigate(`/documents/edit/${doc._id}`)}
-            className="px-4 py-2 rounded-2xl bg-blue-50 text-blue-700 font-bold hover:bg-blue-100 transition"
+            className="px-4 py-2 rounded-2xl bg-blue-50 text-blue-700 font-bold hover:bg-blue-100"
           >
             ✏️ Edit
           </button>
 
           <button
             onClick={handleDelete}
-            className="px-4 py-2 rounded-2xl bg-red-50 text-red-700 font-bold hover:bg-red-100 transition"
+            className="px-4 py-2 rounded-2xl bg-red-50 text-red-700 font-bold hover:bg-red-100"
           >
             🗑 Delete
           </button>
@@ -159,30 +189,27 @@ const DocumentCard = ({ doc, onDelete, onOCRDone }) => {
       </div>
 
       {/* BUTTON ROW */}
-      <div className="mt-5 flex gap-3 items-center flex-wrap">
-        {/* Open File */}
+      <div className="mt-5 flex gap-3 flex-wrap">
         <a
           href={doc.fileUrl}
           target="_blank"
           rel="noreferrer"
-          className="px-4 py-2 rounded-2xl bg-gray-100 text-gray-900 font-bold hover:bg-gray-200 transition"
+          className="px-4 py-2 rounded-2xl bg-gray-100 font-bold"
         >
           📄 Open File
         </a>
 
-        {/* OCR Button */}
         {!isProcessed && (
           <button
             onClick={handleStartOCR}
             disabled={ocrLoading}
-            className={`px-4 py-2 rounded-2xl font-bold text-white transition shadow-sm
-              ${
-                ocrLoading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : isFailed
-                  ? "bg-red-600 hover:bg-red-700"
-                  : "bg-green-600 hover:bg-green-700"
-              }`}
+            className={`px-4 py-2 rounded-2xl font-bold text-white ${
+              ocrLoading
+                ? "bg-gray-400"
+                : isFailed
+                ? "bg-red-600"
+                : "bg-green-600"
+            }`}
           >
             {ocrLoading
               ? "Running OCR..."
@@ -192,24 +219,17 @@ const DocumentCard = ({ doc, onDelete, onOCRDone }) => {
           </button>
         )}
 
-        {/* OCR Done Badge */}
         {isProcessed && (
-          <span className="px-4 py-2 rounded-2xl bg-green-50 text-green-700 font-bold border border-green-200">
+          <span className="px-4 py-2 rounded-2xl bg-green-50 text-green-700 font-bold">
             OCR Done ✅
           </span>
         )}
 
-        {/* Explain Button */}
         {isProcessed && (
           <button
             onClick={handleExplain}
             disabled={explainLoading}
-            className={`px-4 py-2 rounded-2xl font-bold text-white transition shadow-sm
-              ${
-                explainLoading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-purple-600 hover:bg-purple-700"
-              }`}
+            className="px-4 py-2 rounded-2xl font-bold text-white bg-purple-600"
           >
             {explainLoading
               ? "Loading..."
@@ -220,33 +240,40 @@ const DocumentCard = ({ doc, onDelete, onOCRDone }) => {
         )}
       </div>
 
-      {/* EXPLANATION SECTION */}
+      {/* EXPLANATION */}
       <AnimatePresence>
         {isProcessed && showExplain && (
           <motion.div
             initial={{ opacity: 0, y: 10, height: 0 }}
             animate={{ opacity: 1, y: 0, height: "auto" }}
             exit={{ opacity: 0, y: 10, height: 0 }}
-            transition={{ duration: 0.25 }}
-            className="mt-5 overflow-hidden"
+            className="mt-5"
           >
-            <div className="rounded-3xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white p-4">
+            <div className="rounded-3xl border bg-gray-50 p-4">
+              
+              {/* HEADER WITH SPEAK BUTTON */}
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-extrabold text-gray-900">
                   🤖 AI Explanation
                 </h3>
 
-                <span className="text-xs font-bold px-3 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
-                  Smart Notes
-                </span>
+                <button
+                  onClick={handleSpeak}
+                  className={`px-3 py-1 rounded-full text-xs font-bold border
+                    ${
+                      isSpeaking
+                        ? "bg-red-50 text-red-700 border-red-200"
+                        : "bg-blue-50 text-blue-700 border-blue-200"
+                    }`}
+                >
+                  {isSpeaking ? "⏹ Stop" : "🔊 Read"}
+                </button>
               </div>
 
-              <div className="max-h-[320px] overflow-y-auto rounded-2xl border border-gray-200 bg-white p-4">
-                <div className="prose max-w-none prose-headings:font-extrabold prose-p:text-gray-700 prose-strong:text-gray-900">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {llmText || "No explanation available."}
-                  </ReactMarkdown>
-                </div>
+              <div className="max-h-[320px] overflow-y-auto bg-white p-4 rounded-xl">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {llmText || "No explanation available."}
+                </ReactMarkdown>
               </div>
             </div>
           </motion.div>
