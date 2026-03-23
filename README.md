@@ -231,7 +231,7 @@ npm run dev
 
 ## 👨‍💻 Author
 
-**Vivek Patel**
+**Vivek Kumar**
 CSE — NIT Manipur
 
 🔗 GitHub: https://github.com/Vivek-kumar-v
