@@ -88,7 +88,7 @@ def refine_text_with_llm(
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",  # fast + cost-efficient
+            model="gpt-4o-mini",  
             messages=[
                 {"role": "system", "content": "You are a careful academic editor."},
                 {"role": "user", "content": prompt}

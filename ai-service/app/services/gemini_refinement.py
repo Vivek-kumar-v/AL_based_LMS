@@ -100,30 +100,31 @@ def extract_text_from_response(response) -> Optional[str]:
 
 # PROMPT BUILDER
 
-def build_prompt(cleaned_text: str) -> str:
+def build_prompt(text: str) -> str:
     return f"""
-You are an academic text editor.
+You are an OCR correction engine for academic documents.
 
-Your task is to clean and restructure the OCR-extracted academic text below.
+Your ONLY task is to improve the formatting and readability of OCR extracted text.
 
-You MUST:
-- Fix spelling mistakes
-- Fix grammar
-- Reconstruct broken sentences
-- Organize content into headings and bullet points for readability
+Rules:
 
-You MUST NOT:
-- Add new information
-- Remove original meaning
-- Introduce explanations or examples
-
-Do summarize.
-Do NOT invent content.
+1. Correct spelling mistakes.
+2. Correct grammar.
+3. Repair broken sentences.
+4. Preserve headings.
+5. Preserve bullet points.
+6. Preserve tables whenever possible.
+7. Remove OCR artefacts like <br>, duplicated symbols and random punctuation.
+8. Keep the original order.
+9. Do NOT summarize.
+10. Do NOT explain.
+11. Do NOT add any new information.
+12. Do NOT remove important information.
+13. Return ONLY the corrected text.
 
 OCR TEXT:
-\"\"\"
-{cleaned_text}
-\"\"\"
+
+{text}
 """.strip()
 
 
@@ -173,7 +174,7 @@ def refine_text_with_gemini(cleaned_text: str) -> str:
 
             start_time = time.time()
             response = client.models.generate_content(
-                model="gemini-2.5-flash-preview-09-2025",
+                model="gemini-3.6-flash",
                 contents=[
                     types.Content(
                         role="user",

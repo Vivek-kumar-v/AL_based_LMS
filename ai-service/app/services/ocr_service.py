@@ -7,6 +7,7 @@ from app.services.gemini_vision import extract_text_from_image
 
 from app.services.text_refinement import refine_text
 from app.services.concept_extraction import extract_concepts
+from app.services.gemini_refinement import refine_text_with_gemini
 
 
 def extract_text_from_pdf(pdf_bytes: bytes) -> str:
@@ -78,8 +79,15 @@ def process_document_ocr(payload: OCRRequest):
         )
 
     cleaned_text = refine_text(raw_text)
+    
+    llmText = refine_text_with_gemini(raw_text)
+    
+    if not llmText or not llmText.strip():
+        llmText = cleaned_text
 
-    concepts = extract_concepts(cleaned_text)
+    concepts = extract_concepts(llmText)
+    
+    
 
     return {
 
@@ -87,7 +95,7 @@ def process_document_ocr(payload: OCRRequest):
 
         "cleanedText": cleaned_text,
 
-        "llmText": cleaned_text,
+        "llmText": llmText,
 
         "concepts": concepts
 
