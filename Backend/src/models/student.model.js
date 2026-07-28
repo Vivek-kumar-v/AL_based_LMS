@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 
 const studentSchema = new Schema(
   {
-    // AUTH & IDENTITY
     username: {
       type: String,
       required: true,
@@ -36,7 +35,7 @@ const studentSchema = new Schema(
 
     password: {
       type: String,
-      required: [true,"Password is required"],
+      required: [true, "Password is required"],
     },
 
     refreshToken: {
@@ -45,12 +44,10 @@ const studentSchema = new Schema(
 
     role: {
       type: String,
-      enum: ["student", "admin","Professor"],
+      enum: ["student", "admin", "Professor"],
       default: "student",
     },
 
-
-    // ACADEMIC PROFILE
     collegeName: {
       type: String,
       trim: true,
@@ -71,8 +68,6 @@ const studentSchema = new Schema(
       },
     ],
 
-
-    // LEARNING PREFERENCES
     preferences: {
       explanationStyle: {
         type: String,
@@ -87,8 +82,6 @@ const studentSchema = new Schema(
       },
     },
 
-
-    // CONCEPT INTELLIGENCE
     conceptStats: [
       {
         conceptId: {
@@ -109,8 +102,6 @@ const studentSchema = new Schema(
       },
     ],
 
-  
-    // PYQ INTERACTION
     pyqActivity: [
       {
         questionId: {
@@ -127,8 +118,6 @@ const studentSchema = new Schema(
       },
     ],
 
-
-    // REVISION & ANALYTICS
     revisionHistory: [
       {
         conceptId: {
@@ -162,41 +151,32 @@ const studentSchema = new Schema(
   }
 );
 
-
-
-
 studentSchema.pre("save", async function () {
-    if (!this.isModified("password")) return;
-  
-    this.password = await bcrypt.hash(this.password, 10);
+  if (!this.isModified("password")) return;
+
+  this.password = await bcrypt.hash(this.password, 10);
+});
+
+studentSchema.methods.isPasswordCorrect = async function (password) {
+  return bcrypt.compare(password, this.password);
+};
+
+studentSchema.methods.generateAccessToken = function () {
+  return jwt.sign(
+    {
+      _id: this._id,
+      email: this.email,
+      role: this.role,
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+  );
+};
+
+studentSchema.methods.generateRefreshToken = function () {
+  return jwt.sign({ _id: this._id }, process.env.REFRESH_TOKEN_SECRET, {
+    expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
   });
-  
-  
-  studentSchema.methods.isPasswordCorrect = async function (password) {
-    return bcrypt.compare(password, this.password);
-  };
-  
+};
 
-
-  studentSchema.methods.generateAccessToken = function () {
-    return jwt.sign(
-      {
-        _id: this._id,
-        email: this.email,
-        role: this.role,
-      },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
-    );
-  };
-  
-  studentSchema.methods.generateRefreshToken = function () {
-    return jwt.sign(
-      { _id: this._id },
-      process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
-    );
-  };
-  
-
-  export const Student = mongoose.model("Student", studentSchema);
+export const Student = mongoose.model("Student", studentSchema);

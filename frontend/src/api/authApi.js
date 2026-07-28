@@ -1,7 +1,6 @@
 import axiosInstance from "./axiosInstance";
 
 export const registerStudentApi = async (formData) => {
-  // formData must include avatar file
   const res = await axiosInstance.post("/users/register", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });

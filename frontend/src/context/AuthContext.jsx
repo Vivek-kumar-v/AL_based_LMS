@@ -16,7 +16,6 @@ const AuthProvider = ({ children }) => {
     setAuthLoading(false);
   }, []);
 
-  // ✅ LOGIN
   const login = async (email, password) => {
     const res = await loginStudentApi({ email, password });
 
@@ -28,13 +27,11 @@ const AuthProvider = ({ children }) => {
     setStudent(student);
   };
 
-  // ✅ REGISTER (optional, for later)
   const register = async (formData) => {
     const res = await registerStudentApi(formData);
     return res;
   };
 
-  // ✅ LOGOUT
   const logout = () => {
     setStudent(null);
     localStorage.removeItem("student");

@@ -13,7 +13,6 @@ dotenv.config();
 const processDocumentOCR = asyncHandler(async (req, res) => {
   const { documentId } = req.params;
 
-  // VALIDATE DOCUMENT ID
   if (!mongoose.Types.ObjectId.isValid(documentId)) {
     res.status(500).json(new ApiError(400, "Invalid document ID"));
   }
@@ -30,7 +29,6 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, document, "Document already processed"));
   }
 
-  // NORMALIZE FILE TYPE
   let normalizedFileType;
 
   if (document.fileType === "pdf") {
@@ -41,7 +39,6 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
     res.status(500).json(new ApiError(400, "Unsupported file type for OCR"));
   }
  
-  // CALL PYTHON OCR SERVICE
   let ocrResponse;
   try {
     const OCR_URL = process.env.OCR_SERVER_URL;
@@ -79,21 +76,18 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
 
   const { rawText, cleanedText, llmText, concepts } = ocrResponse.data;
 
-  // SAVE OCR RESULT
   document.rawText = rawText;
   document.llmText = llmText;
   document.cleanedText = cleanedText;
   document.processingStatus = "processed";
   document.processedAt = new Date();
 
-  // SAVE CONCEPTS (NORMALIZED)
   const oldConceptIds = document.extractedConcepts || [];
   const conceptIds = [];
 
   for (const conceptName of concepts) {
     const normalized = normalizeConceptName(conceptName);
 
-    // Skip junk concepts
     if (!normalized || normalized.length < 3) continue;
 
     const concept = await Concept.findOneAndUpdate(
@@ -111,9 +105,7 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
     conceptIds.push(concept._id);
   }
 
-  // ✅ UPDATE frequencyInPYQ ONLY FOR PYQ DOCUMENTS
     if (document.documentType === "pyq") {
-      // 1) Decrease old concepts (if OCR rerun)
       if (oldConceptIds.length > 0) {
         await Concept.updateMany(
           { _id: { $in: oldConceptIds } },
@@ -121,7 +113,6 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
         );
       }
 
-      // 2) Increase new concepts
       if (conceptIds.length > 0) {
         await Concept.updateMany(
           { _id: { $in: conceptIds } },
@@ -131,7 +122,6 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
     }
 
   document.extractedConcepts = conceptIds;
-  // ✅ UPDATE STUDENT CONCEPT STATS (for weak concepts feature)
   const studentId = req.student?._id;
 
   if (studentId && conceptIds.length > 0) {
@@ -162,7 +152,6 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
 
   await document.save();
 
-  // RETURN POPULATED DOCUMENT
   const populatedDocument = await Document.findById(document._id)
     .populate("extractedConcepts", "displayName subject importanceScore frequencyInPYQ")
     .select("+rawText +cleanedText +llmText");

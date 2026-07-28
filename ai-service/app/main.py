@@ -9,7 +9,6 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# ✅ CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,7 +16,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ Root route (GET + HEAD)
 @app.api_route("/", methods=["GET", "HEAD"])
 def root():
     return {
@@ -26,7 +24,6 @@ def root():
         "timestamp": datetime.utcnow().isoformat()
     }
 
-# ✅ Health check route (GET + HEAD)
 @app.api_route("/health", methods=["GET", "HEAD"])
 def health():
     return {
@@ -36,5 +33,4 @@ def health():
     
     
 
-# ✅ OCR Router
 app.include_router(ocr_router, prefix="/ocr", tags=["OCR"])

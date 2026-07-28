@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "../components/common/ProtectedRoute";
 import React from "react";
 
-// Pages
 import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
 import Dashboard from "../pages/Dashboard/Dashboard";

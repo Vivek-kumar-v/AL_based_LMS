@@ -37,13 +37,11 @@ const registerStudent = asyncHandler(async (req, res) => {
   } = req.body;
 
 
-  // VALIDATION
   if (!fullName || !email || !password || !username) {
     throw new ApiError(400, "All required fields must be provided");
   }
 
 
-  // CHECK EXISTING STUDENT
   const existingStudent = await Student.findOne({
     $or: [{ email }, { username }],
   });
@@ -56,7 +54,6 @@ const registerStudent = asyncHandler(async (req, res) => {
   }
 
 
-  // AVATAR UPLOAD
   const avatarLocalPath = req.file?.path;
 
   if (!avatarLocalPath) {
@@ -69,7 +66,6 @@ const registerStudent = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Failed to upload avatar image");
   }
 
-  // CREATE STUDENT
   const student = await Student.create({
     fullName,
     email,
@@ -84,7 +80,6 @@ const registerStudent = asyncHandler(async (req, res) => {
   });
 
 
-  // REMOVE SENSITIVE DATA
   const createdStudent = await Student.findById(student._id).select(
     "-password -refreshToken"
   );
@@ -94,7 +89,6 @@ const registerStudent = asyncHandler(async (req, res) => {
   }
 
 
-  // RESPONSE
   return res.status(201).json(
     new ApiResponse(201, createdStudent, "Student registered successfully")
   );
@@ -104,21 +98,18 @@ const registerStudent = asyncHandler(async (req, res) => {
 const loginStudent = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
 
-  // VALIDATION
   if (!(email || username) || !password) {
     throw new ApiError(400, "Email/Username and password are required");
   }
 
-  // FIND STUDENT
   const student = await Student.findOne({
     $or: [{ email }, { username }],
-  }).select("+password"); // password is select:false (recommended)
+  }).select("+password"); 
 
   if (!student) {
     throw new ApiError(404, "Student does not exist");
   }
 
-  // PASSWORD CHECK
   const isPasswordValid = await student.isPasswordCorrect(password);
 
   if (!isPasswordValid) {
@@ -126,29 +117,24 @@ const loginStudent = asyncHandler(async (req, res) => {
   }
 
 
-  // TOKEN GENERATION
   const accessToken = student.generateAccessToken();
   const refreshToken = student.generateRefreshToken();
 
 
-  // SAVE REFRESH TOKEN
   student.refreshToken = refreshToken;
   await student.save({ validateBeforeSave: false });
 
 
-  // REMOVE SENSITIVE DATA
   const loggedInStudent = await Student.findById(student._id).select(
     "-password -refreshToken"
   );
 
-  // COOKIE OPTIONS
   const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
   };
 
-  // RESPONSE
   return res
     .status(200)
     .cookie("accessToken", accessToken, cookieOptions)
@@ -202,7 +188,6 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Unauthorized! No refresh token provided");
     }
 
-    // VERIFY REFRESH TOKEN AND ISSUE NEW ACCESS TOKEN LOGIC HERE
     jwt.verify(
         refreshToken,
         process.env.REFRESH_TOKEN_SECRET,
@@ -376,17 +361,14 @@ const getStudentProfile = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Student not found");
     }
   
-    // ✅ Check old password
     const isOldPasswordCorrect = await student.isPasswordCorrect(oldPassword);
   
     if (!isOldPasswordCorrect) {
       throw new ApiError(401, "Old password is incorrect");
     }
   
-    // ✅ Update password
     student.password = newPassword;
   
-    // IMPORTANT: validateBeforeSave MUST be true here (password hashing middleware)
     await student.save();
   
     return res.status(200).json(
@@ -407,10 +389,8 @@ const getStudentProfile = asyncHandler(async (req, res) => {
       throw new ApiError(404, "Student not found");
     }
   
-    // ✅ Delete student
     await Student.findByIdAndDelete(studentId);
   
-    // Clear cookies (same as logout)
     const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

@@ -29,7 +29,6 @@ const uploadDocument = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Title, Document Type and Subject are required");
   }
 
-  // FILE UPLOAD
   const localFilePath = req.file?.path;
   const originalName = req.file?.originalname || "";
 
@@ -43,12 +42,10 @@ const uploadDocument = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Document upload failed, please try again");
   }
 
-  // ✅ BEST FIX: Detect PDF by extension also
   const isPdf =
     originalName.toLowerCase().endsWith(".pdf") ||
     uploadResult.secure_url.toLowerCase().endsWith(".pdf");
 
-  // NORMALIZE FILE TYPE
   let normalizedFileType;
 
 
@@ -58,7 +55,6 @@ const uploadDocument = asyncHandler(async (req, res) => {
     normalizedFileType = "image";
   }
 
-  // CREATE DOCUMENT ENTRY
   const document = await Document.create({
     title,
     description,
@@ -67,7 +63,6 @@ const uploadDocument = asyncHandler(async (req, res) => {
     semester,
     year,
 
-    // IMPORTANT
     fileUrl: uploadResult.secure_url,
     fileType: normalizedFileType,
 
@@ -98,7 +93,6 @@ const getAllNotes = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Unauthorized request");
   }
 
-  // QUERY FILTERS
   const { subject, semester } = req.query;
 
   const filter = {
@@ -114,7 +108,6 @@ const getAllNotes = asyncHandler(async (req, res) => {
     filter.semester = Number(semester);
   }
 
-  // FETCH NOTES
   const notes = await Document.find(filter)
     .select("-rawText -cleanedText") // exclude heavy fields
     .populate("uploadedBy", "fullName avatar")
@@ -137,7 +130,6 @@ const getDocumentById = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Document ID is required");
   }
 
-  // FETCH DOCUMENT
   const document = await Document.findById(documentId)
     .populate("uploadedBy", "fullName avatar role")
     .populate("extractedConcepts", "name");
@@ -146,7 +138,6 @@ const getDocumentById = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Document not found");
   }
 
-  // ACCESS CONTROL
   const isOwner = document.uploadedBy._id.toString() === student._id.toString();
 
   if (!document.isPublic && !isOwner && student.role === "student") {
@@ -163,19 +154,16 @@ const deleteDocument = asyncHandler(async (req, res) => {
     const { documentId } = req.params;
   
 
-    // AUTH CHECK
     if (!student) {
       throw new ApiError(401, "Unauthorized request");
     }
   
 
-    // OBJECT ID VALIDATION
     if (!mongoose.Types.ObjectId.isValid(documentId)) {
       throw new ApiError(400, "Invalid document ID");
     }
   
 
-    // FIND DOCUMENT
     const document = await Document.findById(documentId);
   
     if (!document) {
@@ -183,7 +171,6 @@ const deleteDocument = asyncHandler(async (req, res) => {
     }
   
 
-    // PERMISSION CHECK
     const isOwner =
       document.uploadedBy.toString() === student._id.toString();
   
@@ -198,7 +185,6 @@ const deleteDocument = asyncHandler(async (req, res) => {
     }
   
 
-    // DELETE DOCUMENT
     await Document.findByIdAndDelete(documentId);
   
     return res.status(200).json(
@@ -218,7 +204,6 @@ const deleteDocument = asyncHandler(async (req, res) => {
     }
   
 
-    // QUERY FILTERS
     const { subject, year, semester } = req.query;
   
     const filter = {
@@ -243,7 +228,6 @@ const deleteDocument = asyncHandler(async (req, res) => {
     }
   
 
-    // FETCH PYQs
     const pyqs = await Document.find(filter)
       .select("-rawText -cleanedText")
       .populate("uploadedBy", "fullName role")
@@ -275,7 +259,6 @@ const searchDocuments = asyncHandler(async (req, res) => {
     } = req.query;
   
 
-    // BASE FILTER (SECURITY)
     const filter = {
       $or: [
         { isPublic: true },
@@ -284,7 +267,6 @@ const searchDocuments = asyncHandler(async (req, res) => {
     };
   
 
-    // OPTIONAL FILTERS
     if (subject) {
       filter.subject = subject;
     }
@@ -305,13 +287,11 @@ const searchDocuments = asyncHandler(async (req, res) => {
     }
   
 
-    // TEXT SEARCH
     if (q) {
       filter.$text = { $search: q };
     }
   
 
-    // QUERY EXECUTION
     const documents = await Document.find(filter)
       .select("-rawText -cleanedText")
       .populate("uploadedBy", "fullName role")
@@ -339,13 +319,11 @@ const searchDocuments = asyncHandler(async (req, res) => {
     }
   
 
-    // VALIDATE OBJECT ID
     if (!mongoose.Types.ObjectId.isValid(documentId)) {
       throw new ApiError(400, "Invalid document ID");
     }
   
 
-    // FIND DOCUMENT
     const document = await Document.findById(documentId);
   
     if (!document) {
@@ -353,7 +331,6 @@ const searchDocuments = asyncHandler(async (req, res) => {
     }
   
 
-    // PERMISSION CHECK
     const isOwner =
       document.uploadedBy.toString() === student._id.toString();
   
@@ -368,7 +345,6 @@ const searchDocuments = asyncHandler(async (req, res) => {
     }
   
 
-    // FIELDS TO UPDATE
     const {
       title,
       description,
@@ -386,7 +362,6 @@ const searchDocuments = asyncHandler(async (req, res) => {
     if (year !== undefined) document.year = Number(year);
     if (isPublic !== undefined) document.isPublic = isPublic;
   
-    // Only admin / professor can verify documents
     if (isVerified !== undefined) {
       if (!isAdminOrProfessor) {
         throw new ApiError(
@@ -398,7 +373,6 @@ const searchDocuments = asyncHandler(async (req, res) => {
     }
   
 
-    // SAVE UPDATED DOCUMENT
     await document.save();
   
     return res.status(200).json(

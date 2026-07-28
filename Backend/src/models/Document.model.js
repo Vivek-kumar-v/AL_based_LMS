@@ -2,7 +2,6 @@ import mongoose, { Schema } from "mongoose";
 
 const documentSchema = new Schema(
   {
-    // BASIC METADATA
     title: {
       type: String,
       required: true,
@@ -55,15 +54,14 @@ const documentSchema = new Schema(
       index: true,
     },
 
-    // TEXT PROCESSING
     rawText: {
       type: String,
-      select: false, // large field
+      select: false, 
     },
 
     llmText: {
-        type: String,
-        select: false, // large field
+      type: String,
+      select: false, 
     },
 
     cleanedText: {
@@ -71,7 +69,6 @@ const documentSchema = new Schema(
       select: false,
     },
 
-    // AI PROCESSING STATUS
     processingStatus: {
       type: String,
       enum: ["pending", "processed", "failed"],
@@ -82,7 +79,6 @@ const documentSchema = new Schema(
       type: Date,
     },
 
-    // CONCEPT LINKING
     extractedConcepts: [
       {
         type: Schema.Types.ObjectId,
@@ -90,7 +86,6 @@ const documentSchema = new Schema(
       },
     ],
 
-    // PYQ SPECIFIC FIELDS
     totalQuestions: {
       type: Number,
     },
@@ -99,7 +94,6 @@ const documentSchema = new Schema(
       type: Number,
     },
 
-    // VISIBILITY & MODERATION
     isPublic: {
       type: Boolean,
       default: true,
@@ -115,7 +109,6 @@ const documentSchema = new Schema(
   }
 );
 
-// INDEXES (PERFORMANCE)
 documentSchema.index({ title: "text", subject: "text" });
 documentSchema.index({ uploadedBy: 1 });
 documentSchema.index({ documentType: 1 });
