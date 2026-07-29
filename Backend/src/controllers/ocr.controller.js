@@ -78,6 +78,12 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
 
   const { rawText, cleanedText, llmText, concepts, chunks } = ocrResponse.data;
 
+  console.log("Chunks received:", chunks?.length);
+
+  if (chunks?.length) {
+      console.log("First chunk:", chunks[0]);
+  }
+
   document.rawText = rawText;
   document.llmText = llmText;
   document.cleanedText = cleanedText;
@@ -166,7 +172,10 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
       pageNumber: null,
     }));
 
+    console.log("Saving", chunkDocuments.length, "chunks");
+
     await DocumentChunk.insertMany(chunkDocuments);
+    console.log("Chunks saved successfully");
   }
 
   const populatedDocument = await Document.findById(document._id)
