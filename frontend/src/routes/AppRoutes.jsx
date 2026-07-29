@@ -11,9 +11,6 @@ import Concepts from "../pages/Concepts/Concepts";
 import ConceptPage from "../pages/Concepts/ConceptPage";
 import EditDocument from "../pages/Documents/EditDocument";
 
-
-
-
 import UploadDocument from "../pages/Documents/UploadDocument";
 import Notes from "../pages/Documents/Notes";
 import PYQs from "../pages/Documents/PYQs";
@@ -67,11 +64,15 @@ const AppRoutes = () => {
         }
       />
 
-    <Route path="/profile/edit" element={<EditProfile />} />
-    <Route path="/ask/:documentId" element={<AskAI />} />
-
-
-
+      <Route path="/profile/edit" element={<EditProfile />} />
+      <Route
+        path="/ask/:documentId"
+        element={
+          <ProtectedRoute>
+            <AskAI />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/dashboard"
@@ -109,12 +110,9 @@ const AppRoutes = () => {
         }
       />
 
-    <Route path="/documents/edit/:documentId" element={<EditDocument />} />
-    <Route path="/settings" element={<Settings />} />
-    <Route path="/settings/change-password" element={<ChangePassword />} />
-
-
-
+      <Route path="/documents/edit/:documentId" element={<EditDocument />} />
+      <Route path="/settings" element={<Settings />} />
+      <Route path="/settings/change-password" element={<ChangePassword />} />
 
       <Route
         path="/pyqs"

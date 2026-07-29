@@ -19,11 +19,17 @@ const AskAI = () => {
   const [error, setError] = useState("");
 
   const handleAsk = async () => {
+    if (loading) return;
+
     if (!question.trim()) return;
 
     try {
       setLoading(true);
       setError("");
+
+      // Clear previous response
+      setAnswer("");
+      setSources([]);
 
       const res = await askAIApi({
         question,
@@ -32,6 +38,9 @@ const AskAI = () => {
 
       setAnswer(res.answer || "");
       setSources(res.sources || []);
+
+      // Clear input
+      setQuestion("");
     } catch (err) {
       console.error(err);
 
