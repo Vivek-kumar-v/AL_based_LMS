@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from app.api.ocr_routes import router as ocr_router
+from app.api import embed_routes
+from app.api import chat_routes
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 
@@ -34,3 +36,13 @@ def health():
     
 
 app.include_router(ocr_router, prefix="/ocr", tags=["OCR"])
+app.include_router(
+    embed_routes.router,
+    prefix="/embed",
+    tags=["Embedding"]
+)
+app.include_router(
+    chat_routes.router,
+    prefix="/chat",
+    tags=["Chat"]
+)

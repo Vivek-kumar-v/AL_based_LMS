@@ -1,0 +1,94 @@
+import { useState } from "react";
+import { useParams } from "react-router-dom";
+
+import AskHeader from "../components/ask/AskHeader";
+import ChatInput from "../components/ask/ChatInput";
+import AnswerCard from "../components/ask/AnswerCard";
+import SourceCard from "../components/ask/SourceCard";
+
+import { askAIApi } from "../api/aiApi";
+
+const AskAI = () => {
+  const { documentId } = useParams();
+
+  const [question, setQuestion] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const [answer, setAnswer] = useState("");
+  const [sources, setSources] = useState([]);
+  const [error, setError] = useState("");
+
+  const handleAsk = async () => {
+    if (!question.trim()) return;
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await askAIApi({
+        question,
+        documentId,
+      });
+
+      setAnswer(res.answer || "");
+      setSources(res.sources || []);
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        err.response?.data?.message || "Failed to get AI response."
+      );
+
+      setAnswer("");
+      setSources([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-white">
+      <AskHeader />
+
+      <div className="max-w-5xl mx-auto px-6 py-8">
+
+        <ChatInput
+          question={question}
+          setQuestion={setQuestion}
+          loading={loading}
+          onAsk={handleAsk}
+        />
+
+        {error && (
+          <div className="mt-6 rounded-xl border border-red-500 bg-red-500/10 p-4 text-red-400">
+            {error}
+          </div>
+        )}
+
+        {(loading || answer) && (
+          <AnswerCard
+            loading={loading}
+            answer={answer}
+          />
+        )}
+
+        {sources.length > 0 && (
+          <div className="mt-6 space-y-4">
+            <h2 className="text-lg font-semibold">
+              Sources
+            </h2>
+
+            {sources.map((source) => (
+              <SourceCard
+                key={source._id}
+                source={source}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default AskAI;

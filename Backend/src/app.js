@@ -26,6 +26,7 @@ app.use(
   import dashboardRoutes from "./routes/dashboard.routes.js";
   import revisionRoutes from "./routes/revision.routes.js";
   import conceptRoutes from "./routes/concept.routes.js";
+  import aiRouter from "./routes/ai.routes.js";
 
   // health-check endpoint
   app.get("/api/v1/health", (req, res) => {
@@ -62,6 +63,7 @@ app.use(
   app.use("/api/v1/dashboard", dashboardRoutes);
   app.use("/api/v1/revision", revisionRoutes);
   app.use("/api/v1/concepts", conceptRoutes);
+  app.use("/api/v1/ai", aiRouter);
 
 
 

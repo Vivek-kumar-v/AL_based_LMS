@@ -1,10 +1,12 @@
+from dotenv import load_dotenv
 from google import genai
+import os
 
-client = genai.Client(api_key="YOUR_API_KEY")
+load_dotenv()
 
-response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents="Hello"
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
 )
 
-print(response.text)
+for model in client.models.list():
+    print(model.name)

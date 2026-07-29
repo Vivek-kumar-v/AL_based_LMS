@@ -21,6 +21,7 @@ import ConceptDetails from "../components/concepts/ConceptDetails";
 import EditProfile from "../pages/Profile/EditProfile";
 import Settings from "../pages/setting/Settings";
 import ChangePassword from "../pages/setting/ChangePassword";
+import AskAI from "../pages/AskAI";
 
 const AppRoutes = () => {
   return (
@@ -67,6 +68,7 @@ const AppRoutes = () => {
       />
 
     <Route path="/profile/edit" element={<EditProfile />} />
+    <Route path="/ask/:documentId" element={<AskAI />} />
 
 
 
