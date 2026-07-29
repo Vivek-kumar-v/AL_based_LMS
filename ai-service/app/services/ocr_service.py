@@ -8,6 +8,8 @@ from app.services.gemini_vision import extract_text_from_image
 from app.services.text_refinement import refine_text
 from app.services.concept_extraction import extract_concepts
 from app.services.gemini_refinement import refine_text_with_gemini
+from app.utils.text_chunker import chunk_text
+from app.services.embedding_service import generate_embedding
 
 
 def extract_text_from_pdf(pdf_bytes: bytes) -> str:
@@ -80,23 +82,39 @@ def process_document_ocr(payload: OCRRequest):
 
     cleaned_text = refine_text(raw_text)
     
-    llmText = refine_text_with_gemini(raw_text)
+    # llmText = refine_text_with_gemini(raw_text)
     
-    if not llmText or not llmText.strip():
-        llmText = cleaned_text
+    # if not llmText or not llmText.strip():
+    #     llmText = cleaned_text
 
-    concepts = extract_concepts(llmText)
+    concepts = extract_concepts(raw_text)
     
+    raw_chunks = chunk_text(raw_text)
+    chunks = []
     
+    for i, chunk in enumerate(raw_chunks):
+        embedding = generate_embedding(chunk)
 
+    chunks.append(
+        {
+            "chunkIndex": i,
+            "text": chunk,
+            "embedding": embedding
+        }
+    )
+    
+    
+    
     return {
 
         "rawText": raw_text,
 
         "cleanedText": cleaned_text,
 
-        "llmText": llmText,
+        "llmText": raw_text,
 
-        "concepts": concepts
+        "concepts": concepts,
+        
+        "chunks": chunks,
 
     }
