@@ -16,13 +16,13 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
   console.log("Requested documentId:", req.params.documentId);
 
   if (!mongoose.Types.ObjectId.isValid(documentId)) {
-    res.status(500).json(new ApiError(400, "Invalid document ID"));
+    return res.status(500).json(new ApiError(400, "Invalid document ID"));
   }
 
   const document = await Document.findById(documentId);
 
   if (!document) {
-    res.status(500).json(new ApiError(404, "Document not found"));
+    return res.status(500).json(new ApiError(404, "Document not found"));
   }
 
   console.log("Loaded document:", document._id.toString());
@@ -47,7 +47,7 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
   try {
     const OCR_URL = process.env.OCR_SERVER_URL;
     if (!OCR_URL) {
-      res
+      return res
         .status(500)
         .json(new ApiError(500, "OCR_SERVER_URL is missing in .env"));
     }
