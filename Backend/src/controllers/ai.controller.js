@@ -13,12 +13,18 @@ export const askQuestion = async (req, res) => {
             });
         }
 
-        const embeddingResponse = await axios.post(
-            `${process.env.OCR_SERVER_URL}/embed`,
-            {
-                text: question
-            }
-        );
+        let embeddingResponse;
+        try {
+            embeddingResponse = await axios.post(
+                `${process.env.OCR_SERVER_URL}/embed`,
+                { text: question }
+            );
+            console.log("✅ Embedding generated");
+        } catch (err) {
+            console.error("❌ Embed Error:", err.response?.status, err.response?.data);
+            throw err;
+        }
+
 
         const questionEmbedding = embeddingResponse.data.embedding;
 
@@ -73,13 +79,18 @@ export const askQuestion = async (req, res) => {
             .map(chunk => chunk.text)
             .join("\n\n");
 
-        const chatResponse = await axios.post(
-            `${process.env.OCR_SERVER_URL}/chat`,
-            {
-                context,
-                question
-            }
-        );
+        
+        let chatResponse;
+        try {
+            chatResponse = await axios.post(
+                `${process.env.OCR_SERVER_URL}/chat`,
+                { question, context }
+            );
+            console.log("✅ Chat response generated");
+        } catch (err) {
+            console.error("❌ Chat Error:", err.response?.status, err.response?.data);
+            throw err;
+        }
 
         return res.status(200).json({
             success: true,
