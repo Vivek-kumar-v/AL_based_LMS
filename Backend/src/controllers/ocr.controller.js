@@ -176,7 +176,7 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
     }));
 
     console.log("Saving", chunkDocuments.length, "chunks");
-    console.log("Saving chunks for:", document1._id.toString());
+    console.log("Saving chunks for:", document._id.toString());
     await DocumentChunk.insertMany(chunkDocuments);
     console.log("Chunks saved successfully");
   }
