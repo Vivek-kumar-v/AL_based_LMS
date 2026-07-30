@@ -15,47 +15,43 @@ const AskAI = () => {
   const documentTitle = location.state?.title;
 
   const [question, setQuestion] = useState("");
-  const [currentQuestion, setCurrentQuestion] = useState("");
+  const [messages, setMessages] = useState([]);
 
   const [loading, setLoading] = useState(false);
-
-  const [answer, setAnswer] = useState("");
-  const [sources, setSources] = useState([]);
   const [error, setError] = useState("");
 
   const handleAsk = async () => {
     if (loading || !question.trim()) return;
 
+    const askedQuestion = question;
+
+    // Clear the input immediately
+    setQuestion("");
+
     try {
       setLoading(true);
       setError("");
 
-      // Save the asked question
-      setCurrentQuestion(question);
-
-      // Clear previous response
-      setAnswer("");
-      setSources([]);
-
       const res = await askAIApi({
-        question,
+        question: askedQuestion,
         documentId,
       });
 
-      setAnswer(res.answer || "");
-      setSources(res.sources || []);
-
-      // Clear input
-      setQuestion("");
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          question: askedQuestion,
+          answer: res.answer || "",
+          sources: res.sources || [],
+        },
+      ]);
     } catch (err) {
       console.error(err);
 
       setError(
         err.response?.data?.message || "Failed to get AI response."
       );
-
-      setAnswer("");
-      setSources([]);
     } finally {
       setLoading(false);
     }
@@ -92,42 +88,73 @@ const AskAI = () => {
           </div>
         )}
 
-        {(loading || answer) && (
-          <div className="mt-8 space-y-5">
+        {/* Chat History */}
+        <div className="mt-8 space-y-10">
 
-            {currentQuestion && (
-              <div className="rounded-xl bg-slate-900 border border-slate-800 p-5">
-                <h3 className="text-sm font-semibold text-slate-400 mb-2">
-                  ❓ Your Question
-                </h3>
+          {messages.map((msg) => (
+            <div key={msg.id} className="space-y-5">
 
-                <p className="text-lg">
-                  {currentQuestion}
-                </p>
+              {/* User Question */}
+              <div className="flex justify-end">
+                <div className="max-w-3xl rounded-2xl bg-indigo-600 px-5 py-4">
+                  <p className="mb-2 text-sm font-semibold">
+                    You
+                  </p>
+
+                  <p>{msg.question}</p>
+                </div>
               </div>
-            )}
 
-            <AnswerCard
-              loading={loading}
-              answer={answer}
-            />
-          </div>
-        )}
-
-        {sources.length > 0 && (
-          <div className="mt-8 space-y-4">
-            <h2 className="text-xl font-semibold">
-              📚 Sources
-            </h2>
-
-            {sources.map((source) => (
-              <SourceCard
-                key={source._id}
-                source={source}
+              {/* AI Answer */}
+              <AnswerCard
+                loading={false}
+                answer={msg.answer}
               />
-            ))}
-          </div>
-        )}
+
+              {/* Sources */}
+              {msg.sources.length > 0 && (
+                <div className="space-y-4">
+
+                  <h2 className="text-lg font-semibold">
+                    📚 Sources
+                  </h2>
+
+                  {msg.sources.map((source, index) => (
+                    <SourceCard
+                      key={source._id || index}
+                      source={source}
+                    />
+                  ))}
+
+                </div>
+              )}
+
+            </div>
+          ))}
+
+          {/* Loading */}
+          {loading && (
+            <div className="space-y-5">
+
+              <div className="flex justify-end">
+                <div className="max-w-3xl rounded-2xl bg-indigo-600 px-5 py-4">
+                  <p className="mb-2 text-sm font-semibold">
+                    You
+                  </p>
+
+                  <p>Thinking...</p>
+                </div>
+              </div>
+
+              <AnswerCard
+                loading={true}
+                answer=""
+              />
+
+            </div>
+          )}
+
+        </div>
 
       </div>
     </div>
