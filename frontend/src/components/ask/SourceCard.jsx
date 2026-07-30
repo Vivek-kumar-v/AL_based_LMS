@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { FileText } from "lucide-react";
 
 const SourceCard = ({ source }) => {
+  const [expanded, setExpanded] = useState(false);
+
   return (
     <div
       className="
@@ -25,15 +28,28 @@ const SourceCard = ({ source }) => {
               {source.title || `Chunk ${source.chunkIndex}`}
             </h3>
 
-            <p className="mt-3 text-sm text-slate-400 line-clamp-3">
+            <p
+              className={`mt-3 text-sm text-slate-400 whitespace-pre-wrap ${
+                expanded ? "" : "line-clamp-3"
+              }`}
+            >
               {source.text}
             </p>
+
+            {source.text?.length > 180 && (
+              <button
+                onClick={() => setExpanded(!expanded)}
+                className="mt-3 text-sm font-medium text-indigo-400 hover:text-indigo-300 transition"
+              >
+                {expanded ? "Show Less ↑" : "Show More ↓"}
+              </button>
+            )}
 
           </div>
 
         </div>
 
-        <div className="text-right">
+        <div className="text-right shrink-0">
 
           <p className="text-xs text-slate-500">
             Similarity
