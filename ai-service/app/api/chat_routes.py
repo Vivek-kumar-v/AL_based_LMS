@@ -5,7 +5,6 @@ from app.services.chat_service import ask_gemini
 
 router = APIRouter()
 
-
 class ChatRequest(BaseModel):
     context: str
     question: str
