@@ -48,6 +48,7 @@ const Navbar = () => {
     { name: "PYQs", path: "/pyqs" },
     { name: "Smart Search", path: "/search" },
     { name: "Concepts", path: "/concepts" },
+    { name: "Ask AI", path: "/ask-all" },
   ];
 
   return (
