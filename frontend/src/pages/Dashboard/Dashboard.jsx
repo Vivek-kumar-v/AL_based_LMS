@@ -257,7 +257,6 @@ const Dashboard = () => {
   );
 };
 
-/* ------------------ Small Components ------------------ */
 
 const SummaryCard = ({ title, value, icon, variants }) => {
   return (
