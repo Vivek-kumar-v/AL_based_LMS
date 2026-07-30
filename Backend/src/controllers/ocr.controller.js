@@ -13,6 +13,7 @@ dotenv.config();
 
 const processDocumentOCR = asyncHandler(async (req, res) => {
   const { documentId } = req.params;
+  console.log("Requested documentId:", req.params.documentId);
 
   if (!mongoose.Types.ObjectId.isValid(documentId)) {
     res.status(500).json(new ApiError(400, "Invalid document ID"));
@@ -24,6 +25,8 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
     res.status(500).json(new ApiError(404, "Document not found"));
   }
 
+  console.log("Loaded document:", document._id.toString());
+  console.log("Title:", document.title);
   if (document.processingStatus === "processed") {
     return res
       .status(200)
@@ -173,7 +176,7 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
     }));
 
     console.log("Saving", chunkDocuments.length, "chunks");
-
+    console.log("Saving chunks for:", document1._id.toString());
     await DocumentChunk.insertMany(chunkDocuments);
     console.log("Chunks saved successfully");
   }
