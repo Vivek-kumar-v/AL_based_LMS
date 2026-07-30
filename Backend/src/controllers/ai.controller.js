@@ -6,7 +6,6 @@ export const askQuestion = async (req, res) => {
     try {
         const { question, documentId } = req.body;
 
-        // Validate input
         if (!question || question.trim() === "") {
             return res.status(400).json({
                 success: false,
@@ -14,9 +13,6 @@ export const askQuestion = async (req, res) => {
             });
         }
 
-        // ============================================
-        // Generate embedding for the user's question
-        // ============================================
         const embeddingResponse = await axios.post(
             `${process.env.OCR_SERVER_URL}/embed`,
             {
@@ -33,9 +29,6 @@ export const askQuestion = async (req, res) => {
             });
         }
 
-        // ============================================
-        // Build Vector Search Pipeline
-        // ============================================
         const vectorSearchStage = {
             index: "document_embedding_index",
             path: "embedding",
@@ -44,7 +37,6 @@ export const askQuestion = async (req, res) => {
             limit: 10
         };
 
-        // Search only inside the selected document
         if (
             documentId &&
             mongoose.Types.ObjectId.isValid(documentId)
@@ -54,9 +46,6 @@ export const askQuestion = async (req, res) => {
             };
         }
 
-        // ============================================
-        // Retrieve relevant chunks
-        // ============================================
         const chunks = await DocumentChunk.aggregate([
             {
                 $vectorSearch: vectorSearchStage
@@ -80,16 +69,10 @@ export const askQuestion = async (req, res) => {
             });
         }
 
-        // ============================================
-        // Create context for Gemini
-        // ============================================
         const context = chunks
             .map(chunk => chunk.text)
             .join("\n\n");
 
-        // ============================================
-        // Ask Gemini using retrieved context
-        // ============================================
         const chatResponse = await axios.post(
             `${process.env.OCR_SERVER_URL}/chat`,
             {
@@ -98,9 +81,6 @@ export const askQuestion = async (req, res) => {
             }
         );
 
-        // ============================================
-        // Return answer
-        // ============================================
         return res.status(200).json({
             success: true,
             question,
@@ -134,7 +114,6 @@ export const askQuestionFromAllNotes = async (req, res) => {
             });
         }
 
-        // Generate embedding
         const embeddingResponse = await axios.post(
             `${process.env.OCR_SERVER_URL}/embed`,
             {
