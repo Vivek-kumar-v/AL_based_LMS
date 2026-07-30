@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 
 import AskHeader from "../components/ask/AskHeader";
 import ChatInput from "../components/ask/ChatInput";
@@ -10,8 +10,13 @@ import { askAIApi } from "../api/aiApi";
 
 const AskAI = () => {
   const { documentId } = useParams();
+  const location = useLocation();
+
+  const documentTitle = location.state?.title;
 
   const [question, setQuestion] = useState("");
+  const [currentQuestion, setCurrentQuestion] = useState("");
+
   const [loading, setLoading] = useState(false);
 
   const [answer, setAnswer] = useState("");
@@ -19,13 +24,14 @@ const AskAI = () => {
   const [error, setError] = useState("");
 
   const handleAsk = async () => {
-    if (loading) return;
-
-    if (!question.trim()) return;
+    if (loading || !question.trim()) return;
 
     try {
       setLoading(true);
       setError("");
+
+      // Save the asked question
+      setCurrentQuestion(question);
 
       // Clear previous response
       setAnswer("");
@@ -61,6 +67,18 @@ const AskAI = () => {
 
       <div className="max-w-5xl mx-auto px-6 py-8">
 
+        {documentTitle && (
+          <div className="mb-6 rounded-xl bg-slate-900 border border-slate-800 p-4">
+            <p className="text-sm text-slate-400">
+              Asking from
+            </p>
+
+            <h2 className="text-xl font-semibold">
+              📄 {documentTitle}
+            </h2>
+          </div>
+        )}
+
         <ChatInput
           question={question}
           setQuestion={setQuestion}
@@ -75,16 +93,31 @@ const AskAI = () => {
         )}
 
         {(loading || answer) && (
-          <AnswerCard
-            loading={loading}
-            answer={answer}
-          />
+          <div className="mt-8 space-y-5">
+
+            {currentQuestion && (
+              <div className="rounded-xl bg-slate-900 border border-slate-800 p-5">
+                <h3 className="text-sm font-semibold text-slate-400 mb-2">
+                  ❓ Your Question
+                </h3>
+
+                <p className="text-lg">
+                  {currentQuestion}
+                </p>
+              </div>
+            )}
+
+            <AnswerCard
+              loading={loading}
+              answer={answer}
+            />
+          </div>
         )}
 
         {sources.length > 0 && (
-          <div className="mt-6 space-y-4">
-            <h2 className="text-lg font-semibold">
-              Sources
+          <div className="mt-8 space-y-4">
+            <h2 className="text-xl font-semibold">
+              📚 Sources
             </h2>
 
             {sources.map((source) => (
@@ -95,6 +128,7 @@ const AskAI = () => {
             ))}
           </div>
         )}
+
       </div>
     </div>
   );
