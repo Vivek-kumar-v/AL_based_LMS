@@ -143,8 +143,8 @@ const processDocumentOCR = asyncHandler(async (req, res) => {
           $push: {
             conceptStats: {
               conceptId,
-              strengthScore: 30,
-              lastSeenAt: new Date(),
+              strengthScore: 0,
+              revisionCount: 0,
             },
           },
         }
